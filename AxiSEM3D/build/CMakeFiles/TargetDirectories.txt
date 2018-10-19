@@ -1,0 +1,3 @@
+/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/CMakeFiles/edit_cache.dir
+/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/CMakeFiles/rebuild_cache.dir
+/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/CMakeFiles/axisem3d.dir

@@ -1,0 +1,48 @@
+# inparam.inverse
+
+
+# WHAT : kernel computation 
+# TYPE : bool
+# NOTE : for kernel computation you need a file wavefield_db_fwd.nc4 in output/wavefields/
+COMPUTE_KERNELS 	false
+
+# WHAT : type of kernels to compute 
+# TYPE : Krho Kvp Kvs Kvsh Kvsv Kvph Kvpv Keta
+# NOTE :
+KERNEL_TYPES 		Kvs Kvp
+
+# WHAT : output the entire time series of a kernel
+# TYPE : bool
+# NOTE : much more expensive on RAM and disk storage. 
+
+OUTPUT_TIME_KERNELS 	false
+
+# WHAT : filter 
+# TYPE : log_gabor
+# NOTE :
+FILTER_TYPE	 	log_gabor
+
+# WHAT : center frequency for filter 
+# TYPE : real
+# NOTE :
+CENTER_FREQ	 	0.015
+
+# WHAT : sigma for log gabor 
+# TYPE : real 0<x<1
+# NOTE :
+SIGMA		 	0.7
+
+# WHAT : type of taper 
+# TYPE : cosine
+# NOTE :
+TAPER_TYPE		cosine
+
+# WHAT : beginning of time window in seconds
+# TYPE : real
+# NOTE :
+BEG_WINDOW		150.
+
+# WHAT : end of time window in seconds
+# TYPE : real
+# NOTE :
+END_WINDOW		190.

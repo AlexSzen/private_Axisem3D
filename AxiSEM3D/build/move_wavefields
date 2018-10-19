@@ -1,0 +1,2 @@
+mv output/wavefields/wavefield_db.nc4 output/wavefields/wavefield_db_fwd.nc4
+mv output/stations/axisem3d_synthetics.nc output/stations/axisem3d_synthetics_fwd.nc

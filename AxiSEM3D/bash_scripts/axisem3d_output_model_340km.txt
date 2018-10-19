@@ -1,0 +1,358 @@
+
+======================== Parameters ========================
+  ANIMATION                      =   true 
+  ATTENUATION                    =   false 
+  ATTENUATION_CG4                =   true 
+  ATTENUATION_QKAPPA             =   true 
+  ATTENUATION_SPECFEM_LEGACY     =   false 
+  BEG_WINDOW                     =   150. 
+  CENTER_FREQ                    =   0.015 
+  COMPUTE_KERNELS                =   false 
+  DD_NCUTS_PER_PROC              =   1 
+  DD_PROC_INTERVAL               =   1 
+  DEVELOP_DIAGNOSE_PRELOOP       =   false 
+  DEVELOP_DISABLE_FFTW_WISDOM    =   true 
+  DEVELOP_MAX_TIME_STEPS         =   0 
+  DEVELOP_MEASURED_COSTS         =   false 
+  DEVELOP_NON_SOURCE_MODE        =   false 
+  END_WINDOW                     =   190. 
+  FILTER_PARAMS                  =   70 0.7 
+  FILTER_TYPE                    =   log_gabor 
+  GLL_ANIMATION                  =   5 
+  KERNEL_TYPES                   =   Kvs Kvp 
+  MODEL_1D_EXODUS_MESH_FILE      =   AxiSEM_prem_ani_one_crust_50.e 
+  MODEL_2D_AZIMUTH               =   20. 
+  MODEL_2D_LATITUDE              =   20. 
+  MODEL_2D_LONGITUDE             =   30. 
+  MODEL_2D_MODE                  =   off 
+  MODEL_3D_ELLIPTICITY_INVF      =   299.8 
+  MODEL_3D_ELLIPTICITY_MODE      =   geographic 
+  MODEL_3D_GEOMETRIC_LIST        =   crust1 
+  MODEL_3D_GEOMETRIC_NUM         =   0 
+  MODEL_3D_OCEAN_LOAD            =   none 
+  MODEL_3D_VOLUMETRIC_LIST       =   cylinder$VP$ref1D$.05$340$0.$55.0$0.0$4000.0$55.0$0.0$false$true$100.0$100.0 
+  MODEL_3D_VOLUMETRIC_NUM        =   1 
+  MODEL_PLOT_SLICES_LIST         =   vs$vertex$20$30$perturb weighted 
+  MODEL_PLOT_SLICES_NUM          =   0 
+  NU_CONST                       =   200 
+  NU_EMP_DEPTH_END               =   300.0 
+  NU_EMP_DEPTH_START             =   200.0 
+  NU_EMP_FACTOR_PI               =   5.0 
+  NU_EMP_FACTOR_SURF             =   2.0 
+  NU_EMP_MIN                     =   8 
+  NU_EMP_POW_AXIS                =   1.0 
+  NU_EMP_POW_THETA               =   3.0 
+  NU_EMP_REF                     =   24 
+  NU_EMP_SCALE_AXIS              =   true 
+  NU_EMP_SCALE_DEPTH             =   true 
+  NU_EMP_SCALE_THETA             =   true 
+  NU_EMP_THETA_START             =   45.0 
+  NU_FFTW_LUCKY_NUMBER           =   true 
+  NU_TYPE                        =   constant 
+  NU_USER_PARAMETER_LIST         =   -1.2345 
+  NU_WISDOM_LEARN                =   false 
+  NU_WISDOM_LEARN_EPSILON        =   1e-3 
+  NU_WISDOM_LEARN_INTERVAL       =   5 
+  NU_WISDOM_LEARN_OUTPUT         =   fwd_case6.nu_wisdom.nc 
+  NU_WISDOM_REUSE_FACTOR         =   1.0 
+  NU_WISDOM_REUSE_INPUT          =   kernel.nu_wisdom.nc 
+  OPTION_LOOP_INFO_INTERVAL      =   1000 
+  OPTION_STABILITY_INTERVAL      =   1000 
+  OPTION_VERBOSE_LEVEL           =   detailed 
+  OUTPUT_TIME_KERNELS            =   false 
+  OUTPUT_WAVEFIELD               =   true 
+  OUT_STATIONS_COMPONENTS        =   SPZ 
+  OUT_STATIONS_DUMP_INTERVAL     =   1000 
+  OUT_STATIONS_DUPLICATED        =   rename 
+  OUT_STATIONS_FILE              =   STATIONS 
+  OUT_STATIONS_FORMAT            =   netcdf 
+  OUT_STATIONS_RECORD_INTERVAL   =   1 
+  OUT_STATIONS_SYSTEM            =   geographic 
+  OUT_STATIONS_WHOLE_SURFACE     =   false 
+  RMAX                           =   7000. 
+  RMIN                           =   0. 
+  SIGMA                          =   0.7 
+  SOURCE_FILE                    =   CMTSOLUTION 
+  SOURCE_STF_HALF_DURATION       =   50.0 
+  SOURCE_TIME_FUNCTION           =   erf 
+  SOURCE_TYPE                    =   earthquake 
+  TAPER_TYPE                     =   cosine 
+  THETA_MAX                      =   180. 
+  THETA_MIN                      =   0. 
+  TIME_DELTA_T                   =   0.00 
+  TIME_DELTA_T_FACTOR            =   1.0 
+  TIME_RECORD_LENGTH             =   800.0 
+  WAVEFIELD_DUMP_INTERVAL        =   1 
+  WAVEFIELD_RECORD_INTERVAL      =   50 
+  mpi nproc                      =   20
+======================== Parameters ========================
+
+
+======================= Exodus Model =======================
+  Overview__________________________________________________
+    Exodus Title      =   AxiSEM_prem_ani_one_crust_50.e
+    Mesh CS Type      =   Spherical
+    Number of Nodes   =   2115
+    Number of Quads   =   2016
+  Global Variables__________________________________________
+    dt (nPol = 1)   =   2.52414
+      ellipticity   =   1
+            f_max   =   1
+            f_min   =   0.001
+            f_ref   =   1
+    nr_lin_solids   =   3
+           radius   =   6.371e+06
+              w_0   =   0.0319804
+              w_1   =   0.544161
+              w_2   =   5.30825
+              y_0   =   2.3027
+              y_1   =   1.50429
+              y_2   =   1.67581
+           crdsys   =   spherical
+            model   =   prem_ani_one_crust
+  Connectivity______________________________________________
+       0:   45   91  111   46 
+     ...
+    2015:   25   86   69   26 
+  Coordinates_______________________________________________
+       0:   7.80222e-10   -6.371e+06
+     ...
+    2114:     6.371e+06  3.90111e-10
+  Elemental Variables_______________________________________
+                   ETA_0:             1, ...,             1
+                   ETA_1:             1, ...,             1
+                   ETA_2:             1, ...,             1
+                   ETA_3:             1, ...,             1
+                QKAPPA_0:         57827, ...,        1327.7
+                QKAPPA_1:         57827, ...,        1327.7
+                QKAPPA_2:         57827, ...,        1327.7
+                QKAPPA_3:         57827, ...,        1327.7
+                   QMU_0:             0, ...,          84.6
+                   QMU_1:             0, ...,          84.6
+                   QMU_2:             0, ...,          84.6
+                   QMU_3:             0, ...,          84.6
+                   RHO_0:       12166.3, ...,         12871
+                   RHO_1:       12166.3, ...,       12869.9
+                   RHO_2:       11948.2, ...,       12915.2
+                   RHO_3:       11948.2, ...,       12916.7
+                   VPH_0:       10355.7, ...,       11105.6
+                   VPH_1:       10355.7, ...,       11104.8
+                   VPH_2:       10124.3, ...,       11137.4
+                   VPH_3:       10124.3, ...,       11138.5
+                   VPV_0:       10355.7, ...,       11105.6
+                   VPV_1:       10355.7, ...,       11104.8
+                   VPV_2:       10124.3, ...,       11137.4
+                   VPV_3:       10124.3, ...,       11138.5
+                   VSH_0:             0, ...,       3558.36
+                   VSH_1:             0, ...,       3557.81
+                   VSH_2:             0, ...,       3580.57
+                   VSH_3:             0, ...,       3581.33
+                   VSV_0:             0, ...,       3558.36
+                   VSV_1:             0, ...,       3557.81
+                   VSV_2:             0, ...,       3580.57
+                   VSV_3:             0, ...,       3581.33
+                      dt:       7.02053, ...,       5.84455
+       edge_aspect_ratio:       3.14015, ...,        1.0354
+            element_type:             0, ...,             1
+    equiangular_skewness:       0.03125, ...,     0.0214836
+                   fluid:             1, ...,             0
+  Side Sets_________________________________________________
+                      r1:   128 edges
+    solid_fluid_boundary:   192 edges
+                      t0:   68 edges
+  Miscellaneous_____________________________________________
+    Distance Tolerance / m   =   24.4
+  External__________________________________________________
+    Num. Ellipticity Spline Knots   =   2198
+======================= Exodus Model =======================
+
+
+================= Fourier Expansion Order ==================
+  Type                     =   Constant
+  Specified Order          =   200
+  Use FFTW Lucky Numbers   =   YES
+================= Fourier Expansion Order ==================
+
+
+========================= Sources ========================
+  Number of Sources   =   1
+  Sources List: 
+    
+========================== Source ==========================
+  Type         =   Earthquake
+  Latitude     =   90
+  Longitude    =   0
+  Depth (km)   =   600
+  Moment (N.m) 
+         Mrr   =    1e+23
+         Mtt   =    1e+23
+         Mpp   =    1e+23
+         Mrt   =    0
+         Mrp   =    0
+         Mtp   =    0
+========================== Source ==========================
+
+
+========================= Sources ========================
+
+
+======================= 3D Volumetric ======================
+  Model Name               =   cylinder
+  Material Property        =   VP
+  Reference Type           =   Reference1D
+  Value Inside             =   0.05
+  Cylinder Radius / km     =   340
+  Depth_1 / km             =   0
+  Lat_1 or Theta_1 / deg   =   55
+  Lon_1 or Phi_1 / deg     =   0
+  Depth_2 / km             =   4000
+  Lat_2 or Theta_2 / deg   =   55
+  Lon_2 or Phi_2 / deg     =   0
+  Source-centered          =   NO
+  HWHM lateral / km        =   100
+  HWHM top-bot / km        =   100
+======================= 3D Volumetric ======================
+
+
+=================== Attenuation Builder ====================
+  Attenuation is turned off. 
+=================== Attenuation Builder ====================
+
+
+========================= STFs ========================
+  Number of STFs   =   1
+  STFs List: 
+    
+=================== Source Time Function ===================
+  Time Step               =   0.415096
+  Number of Steps         =   2110
+  Total Duration          =   875.853
+  Duration after Origin   =   800.72
+  Shift before Origin     =   75.1324
+  Time Series Type        =   Erf
+  Half Duration           =   50
+  Decay Factor            =   1.628
+=================== Source Time Function ===================
+
+
+========================= STFs ========================
+
+
+========================= Receivers ========================
+  Number of Receivers   =   1
+  Coordinate System     =   Geographic
+  Receiver List: 
+    AAK   II         20          0   0
+  * Wavefield on the whole domain will be saved.
+========================= Receivers ========================
+
+--------------------------------------------------------------------------
+MPI_ABORT was invoked on rank 8 in communicator MPI_COMM_WORLD 
+with errorcode 0.
+
+NOTE: invoking MPI_ABORT causes Open MPI to kill all MPI processes.
+You may or may not see output from other processes, depending on
+exactly when Open MPI kills them.
+--------------------------------------------------------------------------
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+
+***** AXISEM3D ABORTED UPON RUNTIME EXCEPTION *****
+Need to stop now bro
+***************************************************
+
+[alexPC:24111] 19 more processes have sent help message help-mpi-api.txt / mpi-abort
+[alexPC:24111] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages

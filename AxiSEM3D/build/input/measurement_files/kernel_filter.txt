@@ -1,0 +1,9 @@
+8
+band01 Gabor  30.00 0.5 0.0 0.0
+band02 Gabor  21.21 0.5 0.0 0.0
+band03 Gabor  15.00 0.5 0.0 0.0
+band04 Gabor  10.61 0.5 0.0 0.0
+band05 Gabor  7.50 0.5 0.0 0.0
+band06 Gabor  5.30 0.5 0.0 0.0
+band07 Gabor  3.75 0.5 0.0 0.0
+band08 Gabor  2.65 0.5 0.0 0.0

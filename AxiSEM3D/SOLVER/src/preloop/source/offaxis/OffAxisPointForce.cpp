@@ -1,0 +1,81 @@
+// OffAxisPointForce.h
+// created by Kuangdai on 11-Nov-2017
+// off-axis point-force source
+
+#include "OffAxisPointForce.h"
+#include "Quad.h"
+#include "SpectralConstants.h"
+#include "XMath.h"
+#include <sstream>
+#include "Source.h"
+#include "Relabelling.h"
+#include <iostream>
+OffAxisPointForce::OffAxisPointForce(double depth, double lat, double lon,
+	double srcLat, double srcLon, double srcDep): Source(depth, lat, lon, srcLat, srcLon, srcDep)
+ {
+    // nothing
+}
+
+void OffAxisPointForce::computeSourceFourier(const Quad &myQuad,
+	const RDColP &interpFactZ,
+	const RDColP &interpFactXii,
+	const RDColP &interpFactEta,
+	double phi,
+	arPP_CMatX3 &fouriers) const {
+
+	// Fourier order
+	int nu = myQuad.getNu();
+    // set zero
+	for (int ipnt = 0; ipnt < nPntElem; ipnt++) {
+        fouriers[ipnt] = CMatX3::Zero(nu + 1, 3);
+    }
+
+    // particle relabelling
+    RDRowN JPRT;
+    if (myQuad.hasRelabelling()) {
+        const RDMatXN &JJ = myQuad.getRelabelling().getStiffJacobian();
+		JPRT = XMath::computeFourierAtPhi(JJ, phi);
+    } else {
+		JPRT = RDRowN::Ones();
+	}
+	double eps = 0.015; //we want the gaussian(numax) = eps
+	double amp = 1e30; // if we want to add a scaling factor
+	//double a = 0.02;
+	double a = sqrt( - (4./pow(nu,2.)) * log(eps) ); // a = variance / sqrt(2)
+	// compute source pointwise
+	std::cout << a<<std::endl;
+	std::cout << nu<<std::endl;
+
+	//a = 0.7;
+	for (int ipol = 0; ipol <= nPol; ipol++) {
+        for (int jpol = 0; jpol <= nPol; jpol++) {
+            int ipnt = ipol * nPntEdge + jpol;
+            double fact = interpFactXii(ipol) * interpFactEta(jpol);
+				for (int beta = 0; beta <= nu; beta++) {
+					double gauss_fact = exp( - pow(a, 2.) * pow(beta, 2.) / 4); //gaussian approximate delta in freq domain
+					//gauss_fact = 1.;
+						for (int idim = 0; idim < 3; idim++) {
+							if (idim == 0) {
+								fouriers[ipnt](beta, idim) = Complex(
+									(1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
+								}
+
+				}
+			}
+		}
+    }
+
+
+
+}
+
+std::string OffAxisPointForce::verbose() const {
+	std::stringstream ss;
+    ss << "\n================ Source ================" << std::endl;
+    ss << "  Type         =   " << "Adjoint Source" << std::endl;
+    ss << "  Latitude     =   " << mLatitude << std::endl;
+    ss << "  Longitude    =   " << mLongitude << std::endl;
+    ss << "  Depth (km)   =   " << mDepth / 1e3 << std::endl;
+    ss << "================ Source ================\n" << std::endl;
+	return ss.str();
+}
