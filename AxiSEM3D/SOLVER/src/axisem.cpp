@@ -147,7 +147,7 @@ int axisem_main(int argc, char *argv[]) {
 		MultilevelTimer::begin("Dump mesh quantities",1);
 		pl.mMesh->dumpFields(*(sv.mDomain), *(pl.mParameters));
 		MultilevelTimer::end("Dump mesh quantities",1);
-//		throw std::runtime_error("Need to stop now bro");
+		//throw std::runtime_error("Need to stop now bro");
         // release receivers
         MultilevelTimer::begin("Release Receivers", 1);
         pl.mReceivers->release(*(sv.mDomain), *(pl.mMesh));

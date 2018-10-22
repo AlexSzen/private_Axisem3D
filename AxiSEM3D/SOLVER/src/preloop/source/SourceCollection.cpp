@@ -151,7 +151,14 @@ SourceCollection::SourceCollection(std::string axis_file, std::string axis_type,
 		double srcLon = 0;
 		
 		if (XMPI::root()) {
-			std::string fname_fwd = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd.nc4";
+			std::string fname_fwd;
+			
+			#ifdef _USE_PARALLEL_NETCDF
+				fname_fwd = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd.nc4";
+			#else
+				fname_fwd = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd_0.nc4";
+			#endif
+			
 			NetCDF_Reader nc_reader = NetCDF_Reader();
 			nc_reader.open(fname_fwd);
 			nc_reader.getAttribute("", "source_latitude", srcLat);

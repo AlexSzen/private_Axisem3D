@@ -38,7 +38,7 @@ SET(USE_DOUBLE TRUE)
 # Modules that require parallel NetCDF: 
 # * seismic inversion
 # * wavefield and model visualisation
-SET(USE_PARALLEL_NETCDF TRUE)
+SET(USE_PARALLEL_NETCDF FALSE)
 
 # additional libraries to link with
 # such as HDF5 when NetCDF is built with --disable-shared (e.g., the parallel build)

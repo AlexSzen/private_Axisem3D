@@ -12,7 +12,7 @@ class KernerIO {
 public:
 	
 	KernerIO(bool dumpTimeKernels, int temp_startElem, int temp_countElem, int totSteps, int bufferSize);	
-	void initialize(int totNu, int startElemNu, int countElemNu, int totElem, const std::vector<int> &nusKer,const std::vector<int> &nrsKer);
+	void initialize(int totNuProc, int totNu, int startElemNu, int countElemNu, int totElemProc, int totElem, const std::vector<int> &nusKer,const std::vector<int> &nrsKer);
 	void finalize();
 	void dumpToFile(const vec_vec_ar6_RMatPP &kernels, int bufferSize);
 	

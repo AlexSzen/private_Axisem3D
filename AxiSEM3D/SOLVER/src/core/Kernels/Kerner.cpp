@@ -68,7 +68,7 @@ void Kerner::initialize() {
 	startElemNu = std::accumulate(countElemNu.begin(), countElemNu.begin() + XMPI::rank(), 0);
 	int totTotNu = XMPI::sum(totNu);
 	
-	mIO->initialize(totTotNu, startElemNu, countElemNu[XMPI::rank()], totElems, mNusKernel, mNrsKernel);
+	mIO->initialize(totNu, totTotNu, startElemNu, countElemNu[XMPI::rank()], mKerElements.size(), totElems, mNusKernel, mNrsKernel);
 
 	
 }

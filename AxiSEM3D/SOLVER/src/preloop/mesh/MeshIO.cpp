@@ -71,11 +71,7 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 	RMatXX_RM zero_matAni(gll_ani,gll_ani); //animations 
 	zero_matAni.setZero();	
 	vec_RMatXX_RM zero_ar2_matAni(2,zero_matAni);
-	
-	//vec2_RMatXX_RM mesh_vp_ani;
-	//vec2_RMatXX_RM mesh_vs_ani;
-	
-	//vec_ar2_RMatPP mesh_vp, mesh_vs;
+
 	vec_ar12_RMatPP materials;
 	int nuline = 0;
 	for (int i=0; i<elems_proc; i++) {
@@ -101,16 +97,6 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		vec_CMatPP vs_elem = quad->getMaterialFourier("vs", SlicePlot::PropertyRefTypes::Property3D);
 
 		for (int ialpha=0; ialpha<Nus[i]; ialpha++) { //i assume materials have this expansion order..? they are padded to it anw for kernel computation 
-			
-		/*	mesh_vp_ani.push_back(zero_ar2_matAni);		
-			(mesh_vp_ani.back())[0] = vp_elem[ialpha].block(nPntEdge/2-gll_ani/2, nPntEdge/2-gll_ani/2, gll_ani, gll_ani).real();
-			(mesh_vp_ani.back())[1] = vp_elem[ialpha].block(nPntEdge/2-gll_ani/2, nPntEdge/2-gll_ani/2, gll_ani, gll_ani).imag();
-
-			mesh_vs_ani.push_back(zero_ar2_matAni);		
-			(mesh_vs_ani.back())[0] = vs_elem[ialpha].block(nPntEdge/2-gll_ani/2, nPntEdge/2-gll_ani/2, gll_ani, gll_ani).real();
-			(mesh_vs_ani.back())[1] = vs_elem[ialpha].block(nPntEdge/2-gll_ani/2, nPntEdge/2-gll_ani/2, gll_ani, gll_ani).imag();
-			*/
-		
 
 
 			materials.push_back(zero_ar12_RMatPP);
@@ -147,23 +133,10 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 				materials.back()[10] = eta_elem[ialpha].real();
 				materials.back()[11] = eta_elem[ialpha].imag();
 			}
-	/*		mesh_vp.push_back(zero_ar2_RMatPP);
-			(mesh_vp.back())[0] = vp_elem[ialpha].real();
-			(mesh_vp.back())[1] = vp_elem[ialpha].imag();
-			
-			mesh_vs.push_back(zero_ar2_RMatPP);
-			(mesh_vs.back())[0] = vs_elem[ialpha].real();
-			(mesh_vs.back())[1] = vs_elem[ialpha].imag();*/
 
 			
 		}
 		nuline += Nus[i];
-	 /*   } else {
-		NusAni[i] = 0;
-		NrsAni[i] = 0;
-		Nus[i] = 0; 
-		Nrs[i] = 0;
-	}*/
 		
 		// coords 
 		mesh_S[i] = (elem->getCoordsPoints())[0];
@@ -248,89 +221,137 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 
 	// ---------- <DEFINE NETCDF FILE> ----------
 	NetCDF_Writer nc_writer = NetCDF_Writer();	
-	if (XMPI::root()) { 
+	
+	
+	#ifdef _USE_PARALLEL_NETCDF // use parallel netcdf
+		if (XMPI::root()) { 
+			
+			std::vector<size_t> dimsElem, dimsElemGll, dimsElemNuGll;
+			
+			dimsElem.push_back(elems_all);	
+			dimsElemGll.push_back(elems_all);
+			dimsElemGll.push_back(nPntEdge);
+			dimsElemGll.push_back(nPntEdge);	
+			dimsElemNuGll.push_back(elemNus_all);
+			dimsElemNuGll.push_back(12); // real/imag for each of the 6 material fields 
+			dimsElemNuGll.push_back(nPntEdge);
+			dimsElemNuGll.push_back(nPntEdge);
+			
+			std::vector<size_t> dimsElem_ani, dimsElemGll_ani, dimsElemNuGll_ani;
+			
+			dimsElem_ani.push_back(elems_all_ani);	
+			dimsElemGll_ani.push_back(elems_all_ani);
+			dimsElemGll_ani.push_back(gll_ani);
+			dimsElemGll_ani.push_back(gll_ani);
+			dimsElemNuGll_ani.push_back(elemNus_all);
+			dimsElemNuGll_ani.push_back(2); //just use this to test vp
+			dimsElemNuGll_ani.push_back(nPntEdge);
+			dimsElemNuGll_ani.push_back(nPntEdge);
+
+
+			nc_writer.open(mFileName + ".nc4",true);	
+			nc_writer.defModeOn();
+			nc_writer.defineVariable<int>("Nus", dimsElem);
+			nc_writer.defineVariable<int>("Nrs", dimsElem);
+			nc_writer.defineVariable<int>("domain_decomposition", dimsElem);
+			nc_writer.defineVariable<int>("element_mesh", dimsElem);
+			nc_writer.defineVariable<int>("sem_mesh", dimsElemGll);
+			nc_writer.defineVariable<Real>("mesh_S", dimsElemGll);
+			nc_writer.defineVariable<Real>("mesh_Z", dimsElemGll);
+			nc_writer.defineVariable<Real>("integral_factor", dimsElemGll);
+			nc_writer.defineVariable<Real>("material_fields", dimsElemNuGll);
+			nc_writer.defineVariable<Real>("vp", dimsElemNuGll_ani);
+			nc_writer.defineVariable<Real>("vp1D", dimsElemNuGll_ani);
+			nc_writer.defineVariable<Real>("rho", dimsElemNuGll_ani);
+			nc_writer.defineVariable<Real>("rho1D", dimsElemNuGll_ani);
+
+
+
+
+			nc_writer.defModeOff();
+			
+			nc_writer.writeVariableWhole("domain_decomposition", mMesh->mMsgInfo->mElemToProc);
+			
+			nc_writer.close();
+		}
+		// ---------- </DEFINE NETCDF FILE> ----------
 		
+					
+		// ---------- <WRITE FIELDS> ----------	
+		nc_writer.openParallel(mFileName);
+
+		nc_writer.writeVariableChunk("Nus", Nus, startElem, countElem);
+		nc_writer.writeVariableChunk("Nrs", Nrs, startElem, countElem);
+		nc_writer.writeVariableChunk("element_mesh", mMesh->mMsgInfo->mLocElemToGlobElem, startElem, countElem);
+		nc_writer.writeVariableChunk("sem_mesh", mMesh->mMsgInfo->mLocElemToGlobPoints, startElemGll, countElemGll);
+		nc_writer.writeVariableChunk("mesh_S", mesh_S, startElemGll, countElemGll);
+		nc_writer.writeVariableChunk("mesh_Z", mesh_Z, startElemGll, countElemGll);
+		nc_writer.writeVariableChunk("integral_factor", integral_factor, startElemGll, countElemGll);
+		nc_writer.writeVariableChunk("material_fields", materials, startElemNuGll, countElemNuGll);
+		nc_writer.writeVariableChunk("vp", vp, startElemNuGll_ani, countElemNuGll_ani);
+		nc_writer.writeVariableChunk("vp1D", vp1D, startElemNuGll_ani, countElemNuGll_ani);
+		nc_writer.writeVariableChunk("rho", rho, startElemNuGll_ani, countElemNuGll_ani);
+		nc_writer.writeVariableChunk("rho1D", rho1D, startElemNuGll_ani, countElemNuGll_ani);
+	
+	#else /// use serial netcdf 
 		std::vector<size_t> dimsElem, dimsElemGll, dimsElemNuGll;
+		std::vector<size_t> dimsElemAll; //this is just for domain decomposition, where each proc has the whole domain.
 		
-		dimsElem.push_back(elems_all);	
-		dimsElemGll.push_back(elems_all);
+		dimsElemAll.push_back(elems_all);
+		dimsElem.push_back(elems_proc);	
+		dimsElemGll.push_back(elems_proc);
 		dimsElemGll.push_back(nPntEdge);
 		dimsElemGll.push_back(nPntEdge);	
-		dimsElemNuGll.push_back(elemNus_all);
+		dimsElemNuGll.push_back(elemNus_proc);
 		dimsElemNuGll.push_back(12); // real/imag for each of the 6 material fields 
 		dimsElemNuGll.push_back(nPntEdge);
 		dimsElemNuGll.push_back(nPntEdge);
-		
-		std::vector<size_t> dimsElem_ani, dimsElemGll_ani, dimsElemNuGll_ani;
-		
-		dimsElem_ani.push_back(elems_all_ani);	
-		dimsElemGll_ani.push_back(elems_all_ani);
-		dimsElemGll_ani.push_back(gll_ani);
-		dimsElemGll_ani.push_back(gll_ani);
-		dimsElemNuGll_ani.push_back(elemNus_all);
-		dimsElemNuGll_ani.push_back(2); //just use this to test vp
-		dimsElemNuGll_ani.push_back(nPntEdge);
-		dimsElemNuGll_ani.push_back(nPntEdge);
 
 
-		nc_writer.open(mFileName,true);	
+
+		nc_writer.open(mFileName + "_" + std::to_string(XMPI::rank())+".nc4",true);	// create filenames with proc ranks as indices. 
+		
 		nc_writer.defModeOn();
+		
 		nc_writer.defineVariable<int>("Nus", dimsElem);
 		nc_writer.defineVariable<int>("Nrs", dimsElem);
-		nc_writer.defineVariable<int>("domain_decomposition", dimsElem);
 		nc_writer.defineVariable<int>("element_mesh", dimsElem);
 		nc_writer.defineVariable<int>("sem_mesh", dimsElemGll);
 		nc_writer.defineVariable<Real>("mesh_S", dimsElemGll);
 		nc_writer.defineVariable<Real>("mesh_Z", dimsElemGll);
 		nc_writer.defineVariable<Real>("integral_factor", dimsElemGll);
 		nc_writer.defineVariable<Real>("material_fields", dimsElemNuGll);
-		nc_writer.defineVariable<Real>("vp", dimsElemNuGll_ani);
-		nc_writer.defineVariable<Real>("vp1D", dimsElemNuGll_ani);
-		nc_writer.defineVariable<Real>("rho", dimsElemNuGll_ani);
-		nc_writer.defineVariable<Real>("rho1D", dimsElemNuGll_ani);
+		nc_writer.defineVariable<Real>("vp", dimsElemNuGll);
+		nc_writer.defineVariable<Real>("vp1D", dimsElemNuGll);
+		nc_writer.defineVariable<Real>("rho", dimsElemNuGll);
+		nc_writer.defineVariable<Real>("rho1D", dimsElemNuGll);
+		
+		if (XMPI::root()) // we only need the domain decomposition on root 
+			nc_writer.defineVariable<int>("domain_decomposition", dimsElemAll);
 
-
-
-
+				
 		nc_writer.defModeOff();
 		
-		nc_writer.writeVariableWhole("domain_decomposition", mMesh->mMsgInfo->mElemToProc);
+		if (XMPI::root()) // we only need the domain decomposition on root 
+			nc_writer.writeVariableWhole("domain_decomposition", mMesh->mMsgInfo->mElemToProc);
+			
+		nc_writer.writeVariableWhole("Nus", Nus);
+		nc_writer.writeVariableWhole("Nrs", Nrs);
+		nc_writer.writeVariableWhole("element_mesh", mMesh->mMsgInfo->mLocElemToGlobElem);
+		nc_writer.writeVariableWhole("sem_mesh", mMesh->mMsgInfo->mLocElemToGlobPoints);
+		nc_writer.writeVariableWhole("mesh_S", mesh_S);
+		nc_writer.writeVariableWhole("mesh_Z", mesh_Z);
+		nc_writer.writeVariableWhole("integral_factor", integral_factor);
+		nc_writer.writeVariableWhole("material_fields", materials);
+		nc_writer.writeVariableWhole("vp", vp);
+		nc_writer.writeVariableWhole("vp1D", vp1D);
+		nc_writer.writeVariableWhole("rho", rho);
+		nc_writer.writeVariableWhole("rho1D", rho1D);
 		
 		nc_writer.close();
-	}
-	// ---------- </DEFINE NETCDF FILE> ----------
-	
-	// ---------- <TEST ARRAY VS VECTOR> ----------	
 
-	vec_ar2_RMatPP test_ar(elemNus_proc_ani,zero_ar2_RMatPP);
-	vec_RMatPP zero_vec2(2, RMatPP::Zero());
-	std::vector<vec_RMatPP> test_vec(elemNus_proc_ani, zero_vec2);
-
-	for (int i=0;i<elemNus_proc_ani;i++)
-		for (int j=0;j<2;j++)
-			for (int ipol=0;ipol<=nPol;ipol++)
-				for (int jpol=0;jpol<=nPol;jpol++) {
-					test_ar[i][j](ipol,jpol)=1.;
-					test_vec[i][j](ipol,jpol)=1.;
-				}
-	// ---------- </TEST ARRAY VS VECTOR> ----------	
-				
-	// ---------- <WRITE FIELDS> ----------	
-	//  parallel NetCDF required
-	nc_writer.openParallel(mFileName);
-
-	nc_writer.writeVariableChunk("Nus", Nus, startElem, countElem);
-	nc_writer.writeVariableChunk("Nrs", Nrs, startElem, countElem);
-	nc_writer.writeVariableChunk("element_mesh", mMesh->mMsgInfo->mLocElemToGlobElem, startElem, countElem);
-	nc_writer.writeVariableChunk("sem_mesh", mMesh->mMsgInfo->mLocElemToGlobPoints, startElemGll, countElemGll);
-	nc_writer.writeVariableChunk("mesh_S", mesh_S, startElemGll, countElemGll);
-	nc_writer.writeVariableChunk("mesh_Z", mesh_Z, startElemGll, countElemGll);
-	nc_writer.writeVariableChunk("integral_factor", integral_factor, startElemGll, countElemGll);
-	nc_writer.writeVariableChunk("material_fields", materials, startElemNuGll, countElemNuGll);
-	nc_writer.writeVariableChunk("vp", vp, startElemNuGll_ani, countElemNuGll_ani);
-	nc_writer.writeVariableChunk("vp1D", vp1D, startElemNuGll_ani, countElemNuGll_ani);
-	nc_writer.writeVariableChunk("rho", rho, startElemNuGll_ani, countElemNuGll_ani);
-	nc_writer.writeVariableChunk("rho1D", rho1D, startElemNuGll_ani, countElemNuGll_ani);
+		
+	#endif
 
 
 

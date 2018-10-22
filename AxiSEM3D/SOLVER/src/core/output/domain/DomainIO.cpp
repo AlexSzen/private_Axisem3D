@@ -17,9 +17,13 @@ void DomainIO::initialize(int totalRecordSteps, int recordInterval, int bufferSi
 	mSrcDep = srcDep;
 	
 	mNetCDF = new NetCDF_Writer();
-	std::string fname = Parameters::sOutputDirectory + "/wavefields/wavefield_db.nc4";
 	
-	
+	std::string fname;
+	#ifdef _USE_PARALLEL_NETCDF
+		fname = Parameters::sOutputDirectory + "/wavefields/wavefield_db.nc4";
+	#else 
+		fname = Parameters::sOutputDirectory + "/wavefields/wavefield_db_" + std::to_string(XMPI::rank()) + ".nc4";
+	#endif
 	// fill start and counts
 	int temp_startElemNu; 
 	std::vector<int> temp_countElemNu(XMPI::nproc(),0);
@@ -29,34 +33,86 @@ void DomainIO::initialize(int totalRecordSteps, int recordInterval, int bufferSi
 	
 	int totNu = XMPI::sum(totNuProc);
 	
-	mStartTime.push_back(0);
-	mCountTime.push_back(bufferSize); 
-
-	mStartWvf.push_back(0);
-	mStartWvf.push_back(temp_startElemNu);
-	mStartWvf.push_back(0);
-	mStartWvf.push_back(0);
-	mStartWvf.push_back(0);
+	#ifdef _USE_PARALLEL_NETCDF
 	
-	mCountWvf.push_back(1); // AT THE MOMENT CANNOT DUMP BUFFER SIZE BECAUSE OF NETCDF PROBLEM, SEE ARRAY TEST.
-	mCountWvf.push_back(temp_countElemNu[XMPI::rank()]);
-	mCountWvf.push_back(6);
-	mCountWvf.push_back(nPntEdge);
-	mCountWvf.push_back(nPntEdge);
+		mStartTime.push_back(0);
+		mCountTime.push_back(bufferSize); 
 
-	if (XMPI::root()) {
+		mStartWvf.push_back(0);
+		mStartWvf.push_back(temp_startElemNu);
+		mStartWvf.push_back(0);
+		mStartWvf.push_back(0);
+		mStartWvf.push_back(0);
 		
+		mCountWvf.push_back(1); // AT THE MOMENT CANNOT DUMP BUFFER SIZE BECAUSE OF NETCDF PROBLEM, SEE ARRAY TEST.
+		mCountWvf.push_back(temp_countElemNu[XMPI::rank()]);
+		mCountWvf.push_back(6);
+		mCountWvf.push_back(nPntEdge);
+		mCountWvf.push_back(nPntEdge);
+
+		if (XMPI::root()) {
+			
+			//dimensions 
+			std::vector<size_t> dimsTime;
+			std::vector<size_t> dimsWvf;
+			dimsTime.push_back(totalRecordSteps);
+			dimsWvf.push_back(totalRecordSteps);
+			dimsWvf.push_back(totNu);
+			dimsWvf.push_back(6);
+			dimsWvf.push_back(nPntEdge);
+			dimsWvf.push_back(nPntEdge);
+			
+			mNetCDF->open(fname, false);
+			mNetCDF->defModeOn();
+			
+			mNetCDF->defineVariable<Real>("time", dimsTime);
+			mNetCDF->defineVariable<Real>("displacement_wavefield", dimsWvf);
+			
+			//number of cores 
+			mNetCDF->addAttribute("", "number_procs", XMPI::nproc());
+			// source location
+			mNetCDF->addAttribute("", "source_latitude", mSrcLat);
+			mNetCDF->addAttribute("", "source_longitude", mSrcLon);
+			mNetCDF->addAttribute("", "source_depth", mSrcDep);
+			mNetCDF->addAttribute("", "record_interval", recordInterval);
+			
+	//		mNetCDF->defModeOff();
+			
+			mNetCDF->flush();
+			
+			mNetCDF->close();
+		}
+		mNetCDF->openParallel(fname);
+		
+	#else //serial netcdf 
+	
+		mStartTime.push_back(0);
+		mCountTime.push_back(bufferSize); 
+
+		mStartWvf.push_back(0);
+		mStartWvf.push_back(0);
+		mStartWvf.push_back(0);
+		mStartWvf.push_back(0);
+		mStartWvf.push_back(0);
+		
+		mCountWvf.push_back(1); // in serial, should be able to dump all buffer at once? Nope, still don't work...
+		mCountWvf.push_back(totNuProc);
+		mCountWvf.push_back(6);
+		mCountWvf.push_back(nPntEdge);
+		mCountWvf.push_back(nPntEdge);
+			
 		//dimensions 
 		std::vector<size_t> dimsTime;
 		std::vector<size_t> dimsWvf;
 		dimsTime.push_back(totalRecordSteps);
 		dimsWvf.push_back(totalRecordSteps);
-		dimsWvf.push_back(totNu);
+		dimsWvf.push_back(totNuProc);
 		dimsWvf.push_back(6);
 		dimsWvf.push_back(nPntEdge);
 		dimsWvf.push_back(nPntEdge);
 		
 		mNetCDF->open(fname, false);
+		
 		mNetCDF->defModeOn();
 		
 		mNetCDF->defineVariable<Real>("time", dimsTime);
@@ -70,13 +126,10 @@ void DomainIO::initialize(int totalRecordSteps, int recordInterval, int bufferSi
 		mNetCDF->addAttribute("", "source_depth", mSrcDep);
 		mNetCDF->addAttribute("", "record_interval", recordInterval);
 		
-//		mNetCDF->defModeOff();
+		mNetCDF->defModeOff();
 		
-		mNetCDF->flush();
-		
-		mNetCDF->close();
-	}
-	mNetCDF->openParallel(fname);
+	#endif
+
 }
 
 void DomainIO::finalize() {
@@ -86,18 +139,20 @@ void DomainIO::finalize() {
 }
 
 void DomainIO::dumpToFile(const vec_vec_ar6_RMatPP& bufferDisp, const RColX& bufferTime, int bufferLineTime) {
-	mCountTime[0] = bufferLineTime;
 	
+	mCountTime[0] = bufferLineTime;	
 	mNetCDF->writeVariableChunk("time", bufferTime, mStartTime, mCountTime);
+	mStartTime[0] += bufferLineTime;
 	
 	for (int it = 0; it < bufferLineTime; it++) { //AGAIN, NEED TO INVESTIGATE THIS THING
 		mNetCDF->writeVariableChunk("displacement_wavefield", bufferDisp[it], mStartWvf, mCountWvf);
         mStartWvf[0]++;
     }
+
 	
 	mNetCDF->flush();
 
-	mStartTime[0] += bufferLineTime;
+
 	
 }
 

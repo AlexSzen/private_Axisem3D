@@ -18,20 +18,71 @@ mDumpTimeKernels(dumpTimeKernels), mStartElem(temp_startElem), mCountElem(temp_c
 	
 	
 	// open forward 
-	std::string fname_wvf = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd.nc4";
-	mNetCDF_r->openParallel(fname_wvf);
+	std::string fname_wvf;
 	
+	#ifdef _USE_PARALLEL_NETCDF
+		fname_wvf = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd.nc4";
+		mNetCDF_r->openParallel(fname_wvf);
+	#else 
+		fname_wvf = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd_" + std::to_string(XMPI::rank()) + ".nc4";
+		mNetCDF_r->open(fname_wvf);	
+	#endif
 }
-void KernerIO::initialize(int totNu, int startElemNu, int countElemNu, int totElem, const std::vector<int> &nusKer,const std::vector<int> &nrsKer) {
 
+void KernerIO::initialize(int totNuProc, int totNu, int startElemNu, int countElemNu, int totElemProc, int totElem, const std::vector<int> &nusKer,const std::vector<int> &nrsKer) {
+
+	std::string fname_ker ;
 	
-	// init kernel variables
-	std::string fname_ker = Parameters::sOutputDirectory + "/kernels/kernels_db.nc4";
-	mStartElemNuKernels = startElemNu;
-	mCountElemNuKernels = countElemNu;
-	
-	if (XMPI::root()) {
-	
+	#ifdef _USE_PARALLEL_NETCDF
+		// init kernel variables
+		fname_ker = Parameters::sOutputDirectory + "/kernels/kernels_db.nc4";
+		mStartElemNuKernels = startElemNu;
+		mCountElemNuKernels = countElemNu;
+		
+		if (XMPI::root()) {
+		
+				//create dims and vars in kernel file 
+				mNetCDF_w->open(fname_ker, true);
+				
+				std::vector<size_t> dims_kernels; 
+				std::vector<size_t> dims_nus;
+				
+				if (mDumpTimeKernels) {
+					dims_kernels.push_back( mTotSteps );
+				} else {
+					dims_kernels.push_back( 1 );
+				}		
+				dims_kernels.push_back( totNu );
+				dims_kernels.push_back( 6 ); //real and imag parts of elastic radial ani kernels. 
+				dims_kernels.push_back( nPntEdge );
+				dims_kernels.push_back( nPntEdge );
+				
+				dims_nus.push_back(totElem);
+				
+				mNetCDF_w->defModeOn();
+				mNetCDF_w->defineVariable<Real>("Kernels", dims_kernels);
+				mNetCDF_w->defineVariable<int>("Nus", dims_nus);
+				mNetCDF_w->defineVariable<int>("Nrs", dims_nus);
+
+				
+				mNetCDF_w->defModeOff();
+				mNetCDF_w->close();
+				
+			}
+			
+			mNetCDF_w->openParallel(fname_ker);
+
+			std::vector<size_t> startNus, countNus;
+			startNus.push_back(mStartElem);
+			countNus.push_back(mCountElem);	
+			mNetCDF_w->writeVariableChunk("Nus", nusKer, startNus, countNus);
+			mNetCDF_w->writeVariableChunk("Nrs", nrsKer, startNus, countNus);
+		
+	#else //serial netcdf
+		fname_ker = Parameters::sOutputDirectory + "/kernels/kernels_db_" + std::to_string(XMPI::rank()) + ".nc4";
+		mStartElemNuKernels = 0;
+		mCountElemNuKernels = totNuProc;
+		
 		//create dims and vars in kernel file 
 		mNetCDF_w->open(fname_ker, true);
 		
@@ -43,12 +94,12 @@ void KernerIO::initialize(int totNu, int startElemNu, int countElemNu, int totEl
 		} else {
 			dims_kernels.push_back( 1 );
 		}		
-		dims_kernels.push_back( totNu );
+		dims_kernels.push_back( totNuProc );
 		dims_kernels.push_back( 6 ); //real and imag parts of elastic radial ani kernels. 
 		dims_kernels.push_back( nPntEdge );
 		dims_kernels.push_back( nPntEdge );
 		
-		dims_nus.push_back(totElem);
+		dims_nus.push_back(totElemProc);
 		
 		mNetCDF_w->defModeOn();
 		mNetCDF_w->defineVariable<Real>("Kernels", dims_kernels);
@@ -57,18 +108,13 @@ void KernerIO::initialize(int totNu, int startElemNu, int countElemNu, int totEl
 
 		
 		mNetCDF_w->defModeOff();
-		mNetCDF_w->close();
 		
-	}
+		mNetCDF_w->writeVariableWhole("Nus", nusKer);
+		mNetCDF_w->writeVariableWhole("Nrs", nrsKer);
+		
+	#endif
 	
-	mNetCDF_w->openParallel(fname_ker);
 
-	std::vector<size_t> startNus, countNus;
-	startNus.push_back(mStartElem);
-	countNus.push_back(mCountElem);
-	
-	mNetCDF_w->writeVariableChunk("Nus", nusKer, startNus, countNus);
-	mNetCDF_w->writeVariableChunk("Nrs", nrsKer, startNus, countNus);
 
 }
 
@@ -118,7 +164,11 @@ void KernerIO::loadNus(std::vector<int> &Nus) {
 	countElem.push_back(mCountElem);
 	Nus.assign(mCountElem, 0);
 	
-	mNetCDF_r->readVariableChunk("Nus", Nus, startElem, countElem);
+	#ifdef _USE_PARALLEL_NETCDF
+		mNetCDF_r->readVariableChunk("Nus", Nus, startElem, countElem);
+	#else 
+		mNetCDF_r->read1D("Nus", Nus);
+	#endif
 		
 }
 
@@ -130,7 +180,12 @@ void KernerIO::loadNrs(std::vector<int> &Nrs) {
 	countElem.push_back(mCountElem);
 	Nrs.assign(mCountElem, 0);
 	
-	mNetCDF_r->readVariableChunk("Nrs", Nrs, startElem, countElem);
+	#ifdef _USE_PARALLEL_NETCDF
+		mNetCDF_r->readVariableChunk("Nrs", Nrs, startElem, countElem);
+	#else 
+		mNetCDF_r->read1D("Nrs", Nrs);
+	#endif
+
 		
 }
 
@@ -178,7 +233,11 @@ void KernerIO::loadMaterial(vec_ar12_RMatPP &materials) {
 	std::vector<int> Nus(mCountElem, 0);
 	std::vector<int> Nrs(mCountElem, 0);
 	
-	mNetCDF_r->readVariableChunk("Nus", Nus, startElem, countElem);
+	#ifdef _USE_PARALLEL_NETCDF
+		mNetCDF_r->readVariableChunk("Nus", Nus, startElem, countElem);
+	#else 
+		mNetCDF_r->read1D("Nus", Nus);
+	#endif
 
 	// create start and count for elemNu
 	int totNuProc = 0;
@@ -188,9 +247,13 @@ void KernerIO::loadMaterial(vec_ar12_RMatPP &materials) {
 	XMPI::gather(totNuProc, temp_countElemNu, true);
 	temp_startElemNu = std::accumulate(temp_countElemNu.begin(), temp_countElemNu.begin() + XMPI::rank(), 0);
 	
-	mCountElemNuFwd = temp_countElemNu[XMPI::rank()];
-	mStartElemNuFwd = temp_startElemNu;
-	
+	#ifdef _USE_PARALLEL_NETCDF
+		mCountElemNuFwd = temp_countElemNu[XMPI::rank()];
+		mStartElemNuFwd = temp_startElemNu;
+	#else 
+		mCountElemNuFwd = totNuProc;
+		mStartElemNuFwd = 0;
+	#endif
 	std::vector<size_t> startElemNu, countElemNu;
 	
 	startElemNu.push_back(mStartElemNuFwd);

@@ -97,8 +97,13 @@ STFCollection::STFCollection(double hdur, double duration, std::string mstf, dou
 		NetCDF_Reader ncr = NetCDF_Reader(); // loads forward seismograms 
 		NetCDF_Reader ncr_params = NetCDF_Reader(); // loads params for adjoint sources 
 		
-		ncr.openParallel(fname_seismo);
-		ncr_params.openParallel(fname_adjoint_inputs);
+		#ifdef _USE_PARALLEL_NETCDF
+			ncr.openParallel(fname_seismo);
+			ncr_params.openParallel(fname_adjoint_inputs);
+		#else 
+			ncr.open(fname_seismo);
+			ncr_params.open(fname_adjoint_inputs);
+		#endif
 		
 		// number of adjoint sources 
 		int num_sources = 0;
