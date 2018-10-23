@@ -278,7 +278,7 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		
 					
 		// ---------- <WRITE FIELDS> ----------	
-		nc_writer.openParallel(mFileName);
+		nc_writer.openParallel(mFileName + ".nc4");
 
 		nc_writer.writeVariableChunk("Nus", Nus, startElem, countElem);
 		nc_writer.writeVariableChunk("Nrs", Nrs, startElem, countElem);
@@ -332,8 +332,13 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 				
 		nc_writer.defModeOff();
 		
-		if (XMPI::root()) // we only need the domain decomposition on root 
+		if (XMPI::root()) {// we only need the domain decomposition on root 
 			nc_writer.writeVariableWhole("domain_decomposition", mMesh->mMsgInfo->mElemToProc);
+		}
+		startElemNuGll[0] = 0;
+		countElemNuGll[0] = elemNus_proc;
+		startElemNuGll_ani[0] = 0;
+		countElemNuGll_ani[0] = elemNus_proc;
 			
 		nc_writer.writeVariableWhole("Nus", Nus);
 		nc_writer.writeVariableWhole("Nrs", Nrs);
@@ -342,13 +347,17 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		nc_writer.writeVariableWhole("mesh_S", mesh_S);
 		nc_writer.writeVariableWhole("mesh_Z", mesh_Z);
 		nc_writer.writeVariableWhole("integral_factor", integral_factor);
-		nc_writer.writeVariableWhole("material_fields", materials);
-		nc_writer.writeVariableWhole("vp", vp);
-		nc_writer.writeVariableWhole("vp1D", vp1D);
-		nc_writer.writeVariableWhole("rho", rho);
-		nc_writer.writeVariableWhole("rho1D", rho1D);
+
+		// Another interesting netcdf behaviour. I should be able 
+		// to use writeVariableWhole for the variables below. 
+		// However, if they're 'too big', it crashes, but works with writeVariableChunk.
+		nc_writer.writeVariableChunk("material_fields", materials, startElemNuGll, countElemNuGll);
+		nc_writer.writeVariableChunk("vp", vp, startElemNuGll_ani, countElemNuGll_ani);
+		nc_writer.writeVariableChunk("vp1D", vp1D, startElemNuGll_ani, countElemNuGll_ani);
+		nc_writer.writeVariableChunk("rho", rho, startElemNuGll_ani, countElemNuGll_ani);
+		nc_writer.writeVariableChunk("rho1D", rho1D, startElemNuGll_ani, countElemNuGll_ani);
 		
-		nc_writer.close();
+
 
 		
 	#endif
