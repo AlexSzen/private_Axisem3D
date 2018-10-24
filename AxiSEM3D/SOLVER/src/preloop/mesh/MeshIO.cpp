@@ -307,6 +307,16 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		dimsElemNuGll.push_back(nPntEdge);
 		dimsElemNuGll.push_back(nPntEdge);
 
+		std::vector<size_t> dimsElem_ani, dimsElemGll_ani, dimsElemNuGll_ani;
+		
+		dimsElem_ani.push_back(elems_proc);	
+		dimsElemGll_ani.push_back(elems_proc);
+		dimsElemGll_ani.push_back(nPntEdge);
+		dimsElemGll_ani.push_back(nPntEdge);
+		dimsElemNuGll_ani.push_back(elemNus_proc);
+		dimsElemNuGll_ani.push_back(2); //just use this to test vp
+		dimsElemNuGll_ani.push_back(nPntEdge);
+		dimsElemNuGll_ani.push_back(nPntEdge);
 
 
 		nc_writer.open(mFileName + "_" + std::to_string(XMPI::rank())+".nc4",true);	// create filenames with proc ranks as indices. 
@@ -321,10 +331,10 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		nc_writer.defineVariable<Real>("mesh_Z", dimsElemGll);
 		nc_writer.defineVariable<Real>("integral_factor", dimsElemGll);
 		nc_writer.defineVariable<Real>("material_fields", dimsElemNuGll);
-		nc_writer.defineVariable<Real>("vp", dimsElemNuGll);
-		nc_writer.defineVariable<Real>("vp1D", dimsElemNuGll);
-		nc_writer.defineVariable<Real>("rho", dimsElemNuGll);
-		nc_writer.defineVariable<Real>("rho1D", dimsElemNuGll);
+		nc_writer.defineVariable<Real>("vp", dimsElemNuGll_ani);
+		nc_writer.defineVariable<Real>("vp1D", dimsElemNuGll_ani);
+		nc_writer.defineVariable<Real>("rho", dimsElemNuGll_ani);
+		nc_writer.defineVariable<Real>("rho1D", dimsElemNuGll_ani);
 		
 		if (XMPI::root()) // we only need the domain decomposition on root 
 			nc_writer.defineVariable<int>("domain_decomposition", dimsElemAll);
@@ -347,15 +357,19 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		nc_writer.writeVariableWhole("mesh_S", mesh_S);
 		nc_writer.writeVariableWhole("mesh_Z", mesh_Z);
 		nc_writer.writeVariableWhole("integral_factor", integral_factor);
-
+		nc_writer.writeVariableWhole("material_fields", materials);
+		nc_writer.writeVariableWhole("vp", vp);
+		nc_writer.writeVariableWhole("rho", rho);
+		nc_writer.writeVariableWhole("vp1D", vp1D);
+		nc_writer.writeVariableWhole("rho1D", rho1D);
 		// Another interesting netcdf behaviour. I should be able 
 		// to use writeVariableWhole for the variables below. 
 		// However, if they're 'too big', it crashes, but works with writeVariableChunk.
-		nc_writer.writeVariableChunk("material_fields", materials, startElemNuGll, countElemNuGll);
+	/*	nc_writer.writeVariableChunk("material_fields", materials, startElemNuGll, countElemNuGll);
 		nc_writer.writeVariableChunk("vp", vp, startElemNuGll_ani, countElemNuGll_ani);
 		nc_writer.writeVariableChunk("vp1D", vp1D, startElemNuGll_ani, countElemNuGll_ani);
 		nc_writer.writeVariableChunk("rho", rho, startElemNuGll_ani, countElemNuGll_ani);
-		nc_writer.writeVariableChunk("rho1D", rho1D, startElemNuGll_ani, countElemNuGll_ani);
+		nc_writer.writeVariableChunk("rho1D", rho1D, startElemNuGll_ani, countElemNuGll_ani);*/
 		
 
 
