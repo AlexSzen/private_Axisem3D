@@ -127,7 +127,7 @@ OUTPUT_WAVEFIELD                 	true
 # WHAT: downsampling wavefields
 # TYPE: int
 # NOTE: 
-WAVEFIELD_RECORD_INTERVAL                 3000
+WAVEFIELD_RECORD_INTERVAL                 10
 
 # WHAT: dump interval for kernels. currently buffering in netcdf doesnt work
 # properly so it is still written one by one
