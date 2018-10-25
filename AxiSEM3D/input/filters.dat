@@ -1,0 +1,7 @@
+# WHAT : Filter parameters for kernels.
+# All filters are log gabor
+# Specify center period and sigma
+# TYPE : real
+# NOTE
+
+FILTER_PARAMS 70 0.7 
