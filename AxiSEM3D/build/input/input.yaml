@@ -8,14 +8,14 @@ basic:
     model: "prem_ani"
 
     # The desired dominant period of the mesh.
-    period: 10
+    period: 150
 
 
 # Advanced parameters for more control.
 advanced:
     # Number of elements per wavelength. Used to calculate element
     # sizes to satisfy the desired dominant period.
-    elements_per_wavelength: 2.0
+    elements_per_wavelength: 1.2
 
     # Courant Number used to estimate dt.
     courant_number: 0.6
