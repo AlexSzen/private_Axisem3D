@@ -32,24 +32,26 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 	// ---------- <GENERAL> ----------
 	
 	
-	int gllpoints_proc = domain.getNumPoints();
-	int gllpoints_all = XMPI::sum(gllpoints_proc);
+//	int gllpoints_proc = domain.getNumPoints();
+//	int gllpoints_all = XMPI::sum(gllpoints_proc);
 
-	int elems_proc = domain.getNumElements();
-	int elems_all = XMPI::sum(elems_proc);
+//	int elems_proc = domain.getNumElements();
 
-	int elems_proc_ani = 0, elemNus_proc = 0, elemNus_proc_ani = 0;
 
-	for (int i = 0; i < elems_proc; i++) {
+	int elems_proc = 0, elems_proc_ani = 0, elemNus_proc = 0, elemNus_proc_ani = 0;
+
+	for (int i = 0; i < domain.getNumElements(); i++) {
 		int maxNu = mMesh->getQuad(i)->getNu() + 1;
-		elemNus_proc += maxNu;
-	//	if (domain.getElement(i)->needDumping(rmin,rmax,tmin,tmax)) {
+		
+		if (domain.getElement(i)->needDumping(rmin,rmax,tmin,tmax)) {
+			elems_proc++;
 			elems_proc_ani++;
 			elemNus_proc_ani += maxNu;	
-	//	}
+			elemNus_proc += maxNu;
+		}
 	}
-	
-	
+	std::cout<< elems_proc<<std::endl;
+	int elems_all = XMPI::sum(elems_proc);
 	int elems_all_ani = XMPI::sum(elems_proc_ani);
 	int elemNus_all = XMPI::sum(elemNus_proc);
 	int elemNus_all_ani = XMPI::sum(elemNus_proc_ani);
@@ -68,10 +70,6 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 	vec_ar2_RMatPP rho(elemNus_proc, zero_ar2_RMatPP);
 	vec_ar2_RMatPP rho1D(elemNus_proc, zero_ar2_RMatPP);
 
-	RMatXX_RM zero_matAni(gll_ani,gll_ani); //animations 
-	zero_matAni.setZero();	
-	vec_RMatXX_RM zero_ar2_matAni(2,zero_matAni);
-
 	vec_ar12_RMatPP materials;
 	int nuline = 0;
 	for (int i=0; i<elems_proc; i++) {
@@ -79,69 +77,70 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		Element* elem = domain.getElement(i);
 		Quad* quad = mMesh->mQuads[i];
 		 
-	//	if (elem->needDumping(rmin,rmax,tmin,tmax)) { //for now keep the flexible dumping even for wavefields for kernels
-      	NusAni[i] = elem->getMaxNu()+1;
-      	NrsAni[i] = elem->getMaxNr();
-		Nus[i] = elem->getMaxNu()+1;
-		Nrs[i] = elem->getMaxNr();
-		
-		vec_CMatPP vph_elem = quad->getMaterialFourier("vph", SlicePlot::PropertyRefTypes::Property3D);
-		vec_CMatPP vpv_elem = quad->getMaterialFourier("vpv", SlicePlot::PropertyRefTypes::Property3D);		
-		vec_CMatPP vsh_elem = quad->getMaterialFourier("vsh", SlicePlot::PropertyRefTypes::Property3D);
-		vec_CMatPP vsv_elem = quad->getMaterialFourier("vsv", SlicePlot::PropertyRefTypes::Property3D);
-		vec_CMatPP rho_elem = quad->getMaterialFourier("rho", SlicePlot::PropertyRefTypes::Property3D);
-		vec_CMatPP rho_elem1D = quad->getMaterialFourier("rho", SlicePlot::PropertyRefTypes::Property1D); //for misfit tests 
-		vec_CMatPP eta_elem = quad->getMaterialFourier("eta", SlicePlot::PropertyRefTypes::Property3D);
-		vec_CMatPP vp_elem = quad->getMaterialFourier("vp", SlicePlot::PropertyRefTypes::Property3D);
-		vec_CMatPP vp_elem1D = quad->getMaterialFourier("vp", SlicePlot::PropertyRefTypes::Property1D); //for misfit tests 
-		vec_CMatPP vs_elem = quad->getMaterialFourier("vs", SlicePlot::PropertyRefTypes::Property3D);
-
-		for (int ialpha=0; ialpha<Nus[i]; ialpha++) { //i assume materials have this expansion order..? they are padded to it anw for kernel computation 
-
-
-			materials.push_back(zero_ar12_RMatPP);
+		if (elem->needDumping(rmin,rmax,tmin,tmax)) { //for now keep the flexible dumping even for wavefields for kernels
+	      	NusAni[i] = elem->getMaxNu()+1;
+	      	NrsAni[i] = elem->getMaxNr();
+			Nus[i] = elem->getMaxNu()+1;
+			Nrs[i] = elem->getMaxNr();
 			
-			if (ialpha<rho_elem.size()) {
-				materials.back()[0] = rho_elem[ialpha].real();
-				materials.back()[1] = rho_elem[ialpha].imag();
-				rho[nuline + ialpha][0] = rho_elem[ialpha].real();
-				rho[nuline + ialpha][1] = rho_elem[ialpha].imag();
-				rho1D[nuline + ialpha][0] = rho_elem1D[ialpha].real();
-				rho1D[nuline + ialpha][1] = rho_elem1D[ialpha].imag();
-			}
-			if (ialpha<vph_elem.size()) {
-				materials.back()[2] = vp_elem[ialpha].real();
-				materials.back()[3] = vp_elem[ialpha].imag();
-				vp[nuline + ialpha][0] = vp_elem[ialpha].real();
-				vp[nuline + ialpha][1] = vp_elem[ialpha].imag();
-				vp1D[nuline + ialpha][0] = vp_elem1D[ialpha].real();
-				vp1D[nuline + ialpha][1] = vp_elem1D[ialpha].imag();
-			}
-			if (ialpha<vpv_elem.size()) {
-				materials.back()[4] = vpv_elem[ialpha].real();
-				materials.back()[5] = vpv_elem[ialpha].imag();
-			}
-			if (ialpha<vsh_elem.size()) {
-				materials.back()[6] = vsh_elem[ialpha].real();
-				materials.back()[7] = vsh_elem[ialpha].imag();
-			}
-			if (ialpha<vsv_elem.size()) {
-				materials.back()[8] = vsv_elem[ialpha].real();
-				materials.back()[9] = vsv_elem[ialpha].imag();
-			}
-			if (ialpha<eta_elem.size()) {
-				materials.back()[10] = eta_elem[ialpha].real();
-				materials.back()[11] = eta_elem[ialpha].imag();
-			}
+			vec_CMatPP vph_elem = quad->getMaterialFourier("vph", SlicePlot::PropertyRefTypes::Property3D);
+			vec_CMatPP vpv_elem = quad->getMaterialFourier("vpv", SlicePlot::PropertyRefTypes::Property3D);		
+			vec_CMatPP vsh_elem = quad->getMaterialFourier("vsh", SlicePlot::PropertyRefTypes::Property3D);
+			vec_CMatPP vsv_elem = quad->getMaterialFourier("vsv", SlicePlot::PropertyRefTypes::Property3D);
+			vec_CMatPP rho_elem = quad->getMaterialFourier("rho", SlicePlot::PropertyRefTypes::Property3D);
+			vec_CMatPP rho_elem1D = quad->getMaterialFourier("rho", SlicePlot::PropertyRefTypes::Property1D); //for misfit tests 
+			vec_CMatPP eta_elem = quad->getMaterialFourier("eta", SlicePlot::PropertyRefTypes::Property3D);
+			vec_CMatPP vp_elem = quad->getMaterialFourier("vp", SlicePlot::PropertyRefTypes::Property3D);
+			vec_CMatPP vp_elem1D = quad->getMaterialFourier("vp", SlicePlot::PropertyRefTypes::Property1D); //for misfit tests 
+			vec_CMatPP vs_elem = quad->getMaterialFourier("vs", SlicePlot::PropertyRefTypes::Property3D);
 
+			for (int ialpha=0; ialpha<Nus[i]; ialpha++) { //i assume materials have this expansion order..? they are padded to it anw for kernel computation 
+
+
+				materials.push_back(zero_ar12_RMatPP);
+				
+				if (ialpha<rho_elem.size()) {
+					materials.back()[0] = rho_elem[ialpha].real();
+					materials.back()[1] = rho_elem[ialpha].imag();
+					rho[nuline + ialpha][0] = rho_elem[ialpha].real();
+					rho[nuline + ialpha][1] = rho_elem[ialpha].imag();
+					rho1D[nuline + ialpha][0] = rho_elem1D[ialpha].real();
+					rho1D[nuline + ialpha][1] = rho_elem1D[ialpha].imag();
+				}
+				if (ialpha<vph_elem.size()) {
+					materials.back()[2] = vp_elem[ialpha].real();
+					materials.back()[3] = vp_elem[ialpha].imag();
+					vp[nuline + ialpha][0] = vp_elem[ialpha].real();
+					vp[nuline + ialpha][1] = vp_elem[ialpha].imag();
+					vp1D[nuline + ialpha][0] = vp_elem1D[ialpha].real();
+					vp1D[nuline + ialpha][1] = vp_elem1D[ialpha].imag();
+				}
+				if (ialpha<vpv_elem.size()) {
+					materials.back()[4] = vpv_elem[ialpha].real();
+					materials.back()[5] = vpv_elem[ialpha].imag();
+				}
+				if (ialpha<vsh_elem.size()) {
+					materials.back()[6] = vsh_elem[ialpha].real();
+					materials.back()[7] = vsh_elem[ialpha].imag();
+				}
+				if (ialpha<vsv_elem.size()) {
+					materials.back()[8] = vsv_elem[ialpha].real();
+					materials.back()[9] = vsv_elem[ialpha].imag();
+				}
+				if (ialpha<eta_elem.size()) {
+					materials.back()[10] = eta_elem[ialpha].real();
+					materials.back()[11] = eta_elem[ialpha].imag();
+				}
+
+				
+			}
+			nuline += Nus[i];
 			
+			// coords 
+			mesh_S[i] = (elem->getCoordsPoints())[0];
+			mesh_Z[i] = (elem->getCoordsPoints())[1];
+			XMath::structuredUseFirstRow( (quad->getIntegralFactor()).cast <Real> (), integral_factor[i] ); //integral factor 
 		}
-		nuline += Nus[i];
-		
-		// coords 
-		mesh_S[i] = (elem->getCoordsPoints())[0];
-		mesh_Z[i] = (elem->getCoordsPoints())[1];
-		XMath::structuredUseFirstRow( (quad->getIntegralFactor()).cast <Real> (), integral_factor[i] ); //integral factor 
 
 
 		

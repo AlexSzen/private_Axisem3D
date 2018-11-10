@@ -147,7 +147,7 @@ STFCollection::STFCollection(double hdur, double duration, std::string mstf, dou
 		for (int i = 0; i < num_sources; i++) { // TODO : STF FROM SEISMOGRAMS 
 			
 			std::vector<size_t> dims, dims_params;
-			std::string coord_system = ".ENZ";
+			std::string coord_system = ".SPZ";
 			std::string key = network[i] + "." + name[i] + coord_system;
 			std::string key_params = network[i] + "." + name[i]; 
 			
@@ -173,8 +173,8 @@ STFCollection::STFCollection(double hdur, double duration, std::string mstf, dou
 				filter_types(i_measurement) = filter_type; // gives index of filter to use.
 			} 
 						
-		//	STF *stf = new SeismogramSTF(trace, dt, duration, hdur, decay, adjoint_params, filter_types);
-			STF *stf = new GaussSTF(dt, duration, hdur, decay);
+			STF *stf = new SeismogramSTF(trace, dt, duration, hdur, decay, adjoint_params, filter_types);
+		//	STF *stf = new GaussSTF(dt, duration, hdur, decay);
 			
 			// max total steps
 			int maxTotalSteps = INT_MAX;

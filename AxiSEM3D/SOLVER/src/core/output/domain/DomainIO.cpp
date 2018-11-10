@@ -143,14 +143,16 @@ void DomainIO::dumpToFile(const vec_vec_ar6_RMatPP& bufferDisp, const RColX& buf
 	mCountTime[0] = bufferLineTime;	
 	mNetCDF->writeVariableChunk("time", bufferTime, mStartTime, mCountTime);
 	mStartTime[0] += bufferLineTime;
-	
+	//mNetCDF->flush();
+//	std::cout<<"here"<<std::endl;
 	for (int it = 0; it < bufferLineTime; it++) { //AGAIN, NEED TO INVESTIGATE THIS THING
 		mNetCDF->writeVariableChunk("displacement_wavefield", bufferDisp[it], mStartWvf, mCountWvf);
+
         mStartWvf[0]++;
     }
+//	std::cout<<"And here?"<<std::endl;
 
-	
-	mNetCDF->flush();
+	//mNetCDF->flush();
 
 
 	

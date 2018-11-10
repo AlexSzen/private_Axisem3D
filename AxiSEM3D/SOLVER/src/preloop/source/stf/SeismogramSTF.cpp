@@ -54,7 +54,7 @@ mHalfDuration(hdur_fwd), mDecay(decay_fwd) {
 		Real norm_z = 0.;
 		Real max = 0.;
 		std::ofstream myfile;
-		myfile.open("/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/output/stations/test.txt");
+		myfile.open("/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/stations/test.txt");
 		for (int it = 0; it <= nStep; it++) { //normalization factor : for traveltime tomo it's time integrated squared velocity
 											 // for amplitude it's displacement
 			norm_s += mDeltaT * trace_measurement_T_vel(it, 0) * trace_measurement_T_vel(it, 0);

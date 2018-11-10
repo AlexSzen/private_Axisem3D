@@ -38,8 +38,9 @@ void OffAxisPointForce::computeSourceFourier(const Quad &myQuad,
     } else {
 		JPRT = RDRowN::Ones();
 	}
-	double eps = 0.015; //we want the gaussian(numax) = eps
+	double eps = 0.001; //we want the gaussian(numax) = eps
 	double amp = 1e30; // if we want to add a scaling factor
+	amp = 1.;
 	//double a = 0.02;
 	double a = sqrt( - (4./pow(nu,2.)) * log(eps) ); // a = variance / sqrt(2)
 	// compute source pointwise

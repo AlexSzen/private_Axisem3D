@@ -11,6 +11,7 @@
 #include <sstream>
 #include <memory>
 #include <typeinfo>
+#include "iostream"
 
 #ifdef _USE_PARALLEL_NETCDF
     #include <netcdf_par.h>
@@ -82,10 +83,13 @@ public:
         std::vector<size_t> &start, std::vector<size_t> &count) const {
         int varid = inquireVariable(vname);
         if (data.size() > 0) {
+			//std::cout<<"block here?"<<std::endl;
             if (nc_put_vara(mPWD, varid, start.data(), count.data(), data.data()) != NC_NOERR) {
                 throw std::runtime_error("NetCDF_Writer::writeVariableChunk || "
                     "Error writing variable, variable: " + vname + " || NetCDF file: " + mFileName);
+			
             }
+			//std::cout<<"up to here?"<<std::endl;
         }
     };
     
