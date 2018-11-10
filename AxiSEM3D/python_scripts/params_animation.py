@@ -1,16 +1,16 @@
 ''' Input for wavefield animation '''
 
 #---------- <GENERAL> ----------
-INPUT_FILE = '/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/output/wavefields/wavefield_db_fwd.nc4'
-INPUT_FILE2 = '/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/output/kernels/kernels_db.nc4'
+INPUT_FILE = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/wavefield_db_fwd.nc4'
+INPUT_FILE2 = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernels_db.nc4'
 OUTPUT_DIR = '/home/alex/Desktop/phd/vtk/kernels/'
-OUTPUT_DIR_WISDOM = '/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/input/'
+OUTPUT_DIR_WISDOM = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/input/'
 
 START_TSTEP = 0 # Read the wavefield from this time step
 END_TSTEP = 1  # To this time step
 INT_TSTEP = 1   # With this interval
 
-PLOT_NU = 1
+PLOT_NU = 0
 WISDOM_KERNEL = 0
 EPSILON_WISDOM = 1e-9
 PLOT_INTFACT = 0

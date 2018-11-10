@@ -44,9 +44,9 @@ s_temp = dset_fwd.variables["mesh_S"][:]
 z_temp = dset_fwd.variables["mesh_Z"][:]
 nu = dset_fwd.variables['Nus'][:]
 nuKer = dset_ker.variables['Nus'][:]
-vp_temp = dset_fwd.variables['vp'][:] - dset_fwd.variables['vp1D'][:]
-vp = np.expand_dims(vp_temp, axis = 0) # allows to treat it as a wvf
-int_factor = dset_fwd.variables['integral_factor'][:]
+#vp_temp = dset_fwd.variables['vp'][:] - dset_fwd.variables['vp1D'][:]
+#vp = np.expand_dims(vp_temp, axis = 0) # allows to treat it as a wvf
+#int_factor = dset_fwd.variables['integral_factor'][:]
 npoints = np.max(sem_mesh) + 1
 nelem = len(nu)
 s = np.zeros(npoints, dtype = np.float32)
@@ -111,7 +111,7 @@ if PLOT_NU:
                 'animation'
                 )
         vtk.tofile(OUTPUT_DIR + 'slices/' + 'slice_nu_wisdom' + '.vtk')
-sys.exit()
+#sys.exit()
 if PLOT_INTFACT:
     x_nu, y_nu, z_nu, nu_slice = wc.compute_non_fourier_slice(int_factor)
     points_slice = list(zip(x_nu,y_nu,z_nu))

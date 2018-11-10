@@ -12,15 +12,15 @@ import copy
 
 ### Inputs
 
-INPUT_DIR = '/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/output/stations/'
+INPUT_DIR = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/stations/'
 OUTPUT_DIR = '/home/alex/Desktop/phd/figures/seismograms/'
 
-STATION = 'II.AAK.ENZ'
-STATION2 = 'II.EAK.ENZ'
+STATION = 'II.DAK.ENZ'
+STATION2 = 'II.DAK.ENZ'
 
 
-smgr1 = Dataset(INPUT_DIR + 'axisem3d_synthetics_fwd.nc', 'r')
-smgr2 = Dataset(INPUT_DIR + 'axisem3d_synthetics.nc', 'r')
+smgr1 = Dataset(INPUT_DIR + 'axisem3d_synthetics_fwd_archer.nc', 'r')
+smgr2 = Dataset(INPUT_DIR + 'axisem3d_synthetics_offaxis_nu1782_a0.005_archer.nc', 'r')
 
 
 test = smgr2.variables[STATION2]
