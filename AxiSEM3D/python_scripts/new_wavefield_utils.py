@@ -29,9 +29,9 @@ class WavefieldComputer:
         self.num_steps = len(wavefield)
         self.eps_gauss = 1e-15
 #        self.a = np.sqrt(- ( 4./np.power(np.max(self.nu2),2.) ) * np.log(self.eps_gauss))
-        self.a = 0.244874 
+        self.a = 0.244874
     def compute_non_fourier_slice(self, int_factor): #computes slices for real quantity defined on elements and points
-        
+
         #just plot the whole slice at phi = 0
         r_inner = 0.
         r_outer = 6.371e6
@@ -40,40 +40,32 @@ class WavefieldComputer:
         r_outer_closest = self.r[np.abs(self.r-r_outer).argmin()]
         r_inner_closest = self.r[np.abs(self.r-r_inner).argmin()]
 
-        tags_slice = np.argwhere((self.r > r_inner_closest) & (self.r < r_outer_closest) )
-        n_points_slice = len(tags_slice)
+        intfact_slice = []
+        x_slice = []
+        y_slice = []
+        z_slice = []
 
-        intfact_slice = np.zeros((n_points_slice), dtype = np.float32)
-        x_slice = np.zeros(n_points_slice, dtype = np.float32)
-        y_slice = np.zeros(n_points_slice, dtype = np.float32)
-        z_slice = np.zeros(n_points_slice, dtype = np.float32)
-		
 		num_elems = len(self.nu)
 		nPntEdge = 5
-		
+
 		for ielem in range(num_elems):
 			for ipol in range(nPntEdge):
 				for jpol in range (nPntEdge):
-					
-					### If within range, create the point 
+
+					### If within range, create the point
 					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
-			            int_factor_point = int_factor[ielem, ipol, jpol]
-			            x_slice[ip], y_slice[ip], z_slice[ip] = spz2xyz(self.s[tag],self.z[tag], phi)
-						
-						
+			            x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                        x_slice.append(x_p)
+                        y_slice.append(y_p)
+                        z_slice.append(z_p)
+                        intfact_slice.append(int_factor[ielem, ipol, jpol])
 
-        for ip in range(n_points_slice):
-            tag = tags_slice[ip]
-            elem_tag = np.argwhere(self.sem_mesh==tag)[0] #gives elem, ipol and jpol of this tag. need to solve duplicate points issue
-            int_factor_point = int_factor[elem_tag[0], elem_tag[1], elem_tag[2]]
-            x_slice[ip], y_slice[ip], z_slice[ip] = spz2xyz(self.s[tag],self.z[tag], phi)
+        return np.asarray(x_slice), np.asarray(y_slice), np.asarray(z_slice), np.asarray(intfact_slice)
 
-            intfact_slice[ip] = int_factor_point  
 
-        return x_slice, y_slice, z_slice, intfact_slice
 
     def compute_nu_slice(self):
-        
+
         #just plot the whole slice at phi = 0
         r_inner = 0.
         r_outer = 6.371e6
@@ -82,24 +74,27 @@ class WavefieldComputer:
         r_outer_closest = self.r[np.abs(self.r-r_outer).argmin()]
         r_inner_closest = self.r[np.abs(self.r-r_inner).argmin()]
 
-        tags_slice = np.argwhere((self.r > r_inner_closest) & (self.r < r_outer_closest) )
-        n_points_slice = len(tags_slice)
+        nu_slice = []
+        x_slice = []
+        y_slice = []
+        z_slice = []
 
-        nu_slice = np.zeros((1,n_points_slice), dtype = np.float32)
-        x_slice = np.zeros(n_points_slice, dtype = np.float32)
-        y_slice = np.zeros(n_points_slice, dtype = np.float32)
-        z_slice = np.zeros(n_points_slice, dtype = np.float32)
+		num_elems = len(self.nu)
+		nPntEdge = 5
 
-        for ip in range(n_points_slice):
-            tag = tags_slice[ip]
-            elem_tag = np.argwhere(self.sem_mesh==tag)[0] #gives elem, ipol and jpol of this tag. need to solve duplicate points issue
-            nuelem = self.nu[elem_tag[0]] #nu of this elem
-            ind = self.nu_sum[elem_tag[0]] #index in elem and fouriers dimension of the wavefield
-            x_slice[ip], y_slice[ip], z_slice[ip] = spz2xyz(self.s[tag],self.z[tag], phi)
+		for ielem in range(num_elems):
+			for ipol in range(nPntEdge):
+				for jpol in range (nPntEdge):
 
-            nu_slice[0, ip] = nuelem
+					### If within range, create the point
+					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
+			            x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                        x_slice.append(x_p)
+                        y_slice.append(y_p)
+                        z_slice.append(z_p)
+                        nu_slice.append(self.nu[ielem])
 
-        return x_slice, y_slice, z_slice, nu_slice
+        return np.asarray(x_slice), np.asarray(y_slice), np.asarray(z_slice), np.asarray(nu_slice)
 
 
 
@@ -108,65 +103,94 @@ class WavefieldComputer:
         r_outer_closest = self.r[np.abs(self.r-r_outer).argmin()]
         r_inner_closest = self.r[np.abs(self.r-r_inner).argmin()]
 
-        tags_slice = np.argwhere((self.r > r_inner_closest) & (self.r < r_outer_closest) )
-        n_points_slice = len(tags_slice)
+        ### hacky numpy solution for wvf
+        wvf_slice = np.zeros((self.num_steps,1), dtype = np.float32)
+        x_slice = []
+        y_slice = []
+        z_slice = []
+        count = 0
 
-        wvf_slice = np.zeros((self.num_steps,n_points_slice), dtype = np.float32)
-        x_slice = np.zeros(n_points_slice, dtype = np.float32)
-        y_slice = np.zeros(n_points_slice, dtype = np.float32)
-        z_slice = np.zeros(n_points_slice, dtype = np.float32)
-	
-        for ip in range(n_points_slice):
-            tag = tags_slice[ip]
-            elem_tag = np.argwhere(self.sem_mesh==tag)[0] #gives elem, ipol and jpol of this tag. need to solve duplicate points issue
-            nuelem = self.nu[elem_tag[0]] #nu of this elem
-            nuelem2 = self.nu2[elem_tag[0]] #nu of this elem
-            ind = self.nu_sum[elem_tag[0]] #index in elem and fouriers dimension of the wavefield
-            x_slice[ip], y_slice[ip], z_slice[ip] = spz2xyz(self.s[tag],self.z[tag], phi)                        
-            wvf_slice[:, ip] = self.wvf[:,ind,comp,elem_tag[1],elem_tag[2]]
-            for ialpha in range(1, max(nuelem,nuelem2)):
-                expval =  2 * np.exp(np.deg2rad(phi)*ialpha*1j)
-                gauss_fact = np.exp(-np.power(self.a,2.) * np.power(ialpha, 2.)/4.)
-                wvf_slice[:, ip] += np.real(expval * (self.wvf[:,ind+ialpha,comp,elem_tag[1],elem_tag[2]] + 1j * self.wvf[:,ind+ialpha,comp+1,elem_tag[1],elem_tag[2]]))
+		num_elems = len(self.nu)
+		nPntEdge = 5
 
-        return x_slice, y_slice, z_slice, wvf_slice
+		for ielem in range(num_elems):
+			for ipol in range(nPntEdge):
+				for jpol in range (nPntEdge):
+
+					### If within range, create the point
+					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
+
+                        nuelem = self.nu[ielem] #nu of this elem
+                        nuelem2 = self.nu2[ielem] #nu of this elem
+                        ind = self.nu_sum[ielem] #index in elem and fouriers dimension of the wavefield
+			            x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                        x_slice.append(x_p)
+                        y_slice.append(y_p)
+                        z_slice.append(z_p)
+
+                        ### hacky solution for the wavefield
+                        if (count == 0):
+                            wvf_slice[:, count] = self.wvf[:,ind,comp, ipol, jpol]
+                        else:
+                            wvf_slice = np.append(wvf_slice,self.wvf[:,ind,comp, ipol, jpol], axis = 1 )
+
+
+                        for ialpha in range(1, max(nuelem,nuelem2)):
+                            expval =  2 * np.exp(np.deg2rad(phi)*ialpha*1j)
+                            gauss_fact = np.exp(-np.power(self.a,2.) * np.power(ialpha, 2.)/4.)
+                            wvf_slice[:, count] += np.real(expval * (self.wvf[:,ind+ialpha,comp,ipol,jpol] + 1j * self.wvf[:, ind+ialpha, comp+1, ipol, jpol]))
+
+                        count += 1
+
+        return np.asarray(x_slice), np.asarray(y_slice), np.asarray(z_slice), wvf_slice
 
     def compute_shell(self, r_shell, r_tolerance, sample_density, phis, inner_outer, comp):
 
-            tags_shell= np.argwhere(np.abs(self.r-r_shell) < r_tolerance )
-            n_arc_points = len(tags_shell)
-            perimeters = ((phis[1]-phis[0])/360.) * 2 * np.pi * self.s[tags_shell] * 1e-6 #in thousand km
+            wvf_shell = np.zeros((self.num_steps, 1), dtype = np.float32)
+            x_shell = []
+            y_shell = []
+            z_shell = []
 
-            n_shell_points = (perimeters*sample_density).astype(int).squeeze()
-            write_offsets = np.cumsum(np.concatenate(([0],n_shell_points)))[:-1]
-            tot_shell_points = np.sum(n_shell_points)
+            count = 0
+
+    		num_elems = len(self.nu)
+    		nPntEdge = 5
+
+    		for ielem in range(num_elems):
+    			for ipol in range(nPntEdge):
+    				for jpol in range (nPntEdge):
+
+    					### If within range, create the point
+    					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
+
+                            nuelem = self.nu[ielem] #nu of this elem
+                            nuelem2 = self.nu2[ielem] #nu of this elem
+                            ind = self.nu_sum[ielem] #index in elem and fouriers dimension of the wavefield
+                            perimeter = ((phis[1]-phis[0])/360.) * 2 * np.pi * self.s[ielem; ipol, jpol] * 1e-6 #in thousand km
+                            n_shell_points = (perimeter*sample_density).astype(int)
 
 
-            wvf_shell = np.zeros((self.num_steps,tot_shell_points), dtype = np.float32)
-            x_shell = np.zeros(tot_shell_points)
-            y_shell = np.zeros(tot_shell_points)
-            z_shell = np.zeros(tot_shell_points)
 
-            for ip in range(n_arc_points):
-                tag = tags_shell[ip]
-                elem_tag = np.argwhere(self.sem_mesh==tag)[0]
-                nuelem = self.nu[elem_tag[0]]
-                nuelem2 = self.nu2[elem_tag[0]]
-                ind = self.nu_sum[elem_tag[0]]
-                for isamp in range(n_shell_points[ip]):
-                    phi = phis[0] + isamp * (phis[1]-phis[0]) / n_shell_points[ip]
 
-                    x_shell[write_offsets[ip]+isamp], y_shell[write_offsets[ip]+isamp], z_shell[write_offsets[ip]+isamp] = spz2xyz(self.s[tag], self.z[tag], phi)
+                            for isamp in range(n_shell_points):
+                                phi = phis[0] + isamp * (phis[1]-phis[0]) / n_shell_points
 
-                    wvf_shell[:,write_offsets[ip]+isamp] = self.wvf[:,ind,comp,elem_tag[1],elem_tag[2]]
-                    
-                    for ialpha in range(1,nuelem): #try truncating at something like nuFwd
-                        
-                        gauss_fact = np.exp(-np.power(self.a,2.) * np.power(ialpha, 2.)/4.)
-                        expval = 2 * np.exp(np.deg2rad(phi)*ialpha*1j)
-                        wvf_shell[:, write_offsets[ip]+isamp] += np.real( expval * (self.wvf[:,ind+ialpha,comp,elem_tag[1],elem_tag[2]] + 1j * self.wvf[:,ind+ialpha,comp+1,elem_tag[1],elem_tag[2]]))
-                        
-                        
-                            
-            
-            return x_shell, y_shell, z_shell, wvf_shell
+    			                x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                                x_shell.append(x_p)
+                                y_shell.append(y_p)
+                                z_shell.append(z_p)
+
+                                if count == 0:
+                                    wvf_shell[:, count] = self.wvf[:,ind,comp, ipol, jpol]
+                                else:
+                                    wvf_shell = np.append(wvf_shell, self.wvf[:,ind,comp, ipol, jpol], axis = 1 )
+
+                                for ialpha in range(1,nuelem): #try truncating at something like nuFwd
+
+                                    gauss_fact = np.exp(-np.power(self.a,2.) * np.power(ialpha, 2.)/4.)
+                                    expval = 2 * np.exp(np.deg2rad(phi)*ialpha*1j)
+                                    wvf_shell[:, count] += np.real( expval * (self.wvf[:,ind+ialpha,comp, ipol, jpol] + 1j * self.wvf[:,ind+ialpha,comp+1, ipol, jpol]))
+
+                                count += 1
+
+            return np.asarray(x_shell), np.asarray(y_shell), np.asarray(z_shell), wvf_shell
