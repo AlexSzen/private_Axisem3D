@@ -50,7 +50,6 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 			elemNus_proc += maxNu;
 		}
 	}
-	std::cout<< elems_proc<<std::endl;
 	int elems_all = XMPI::sum(elems_proc);
 	int elems_all_ani = XMPI::sum(elems_proc_ani);
 	int elemNus_all = XMPI::sum(elemNus_proc);
@@ -71,17 +70,21 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 	vec_ar2_RMatPP rho1D(elemNus_proc, zero_ar2_RMatPP);
 
 	vec_ar12_RMatPP materials;
+        
+        // counters for nu and elem
 	int nuline = 0;
-	for (int i=0; i<elems_proc; i++) {
+        int elemcount = 0;
+        
+	for (int i=0; i<domain.getNumElements(); i++) {
 		
 		Element* elem = domain.getElement(i);
 		Quad* quad = mMesh->mQuads[i];
 		 
 		if (elem->needDumping(rmin,rmax,tmin,tmax)) { //for now keep the flexible dumping even for wavefields for kernels
-	      	NusAni[i] = elem->getMaxNu()+1;
-	      	NrsAni[i] = elem->getMaxNr();
-			Nus[i] = elem->getMaxNu()+1;
-			Nrs[i] = elem->getMaxNr();
+	      	        NusAni[elemcount] = elem->getMaxNu()+1;
+	      	        NrsAni[elemcount] = elem->getMaxNr();
+			Nus[elemcount] = elem->getMaxNu()+1;
+			Nrs[elemcount] = elem->getMaxNr();
 			
 			vec_CMatPP vph_elem = quad->getMaterialFourier("vph", SlicePlot::PropertyRefTypes::Property3D);
 			vec_CMatPP vpv_elem = quad->getMaterialFourier("vpv", SlicePlot::PropertyRefTypes::Property3D);		
@@ -94,7 +97,7 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 			vec_CMatPP vp_elem1D = quad->getMaterialFourier("vp", SlicePlot::PropertyRefTypes::Property1D); //for misfit tests 
 			vec_CMatPP vs_elem = quad->getMaterialFourier("vs", SlicePlot::PropertyRefTypes::Property3D);
 
-			for (int ialpha=0; ialpha<Nus[i]; ialpha++) { //i assume materials have this expansion order..? they are padded to it anw for kernel computation 
+			for (int ialpha=0; ialpha<Nus[elemcount]; ialpha++) { //i assume materials have this expansion order..? they are padded to it anw for kernel computation 
 
 
 				materials.push_back(zero_ar12_RMatPP);
@@ -134,12 +137,15 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 
 				
 			}
-			nuline += Nus[i];
+			
 			
 			// coords 
-			mesh_S[i] = (elem->getCoordsPoints())[0];
-			mesh_Z[i] = (elem->getCoordsPoints())[1];
-			XMath::structuredUseFirstRow( (quad->getIntegralFactor()).cast <Real> (), integral_factor[i] ); //integral factor 
+			mesh_S[elemcount] = (elem->getCoordsPoints())[0];
+			mesh_Z[elemcount] = (elem->getCoordsPoints())[1];
+			XMath::structuredUseFirstRow( (quad->getIntegralFactor()).cast <Real> (), integral_factor[elemcount] ); //integral factor 
+                        
+                        nuline += Nus[elemcount];
+                        elemcount ++;
 		}
 
 
