@@ -56,10 +56,10 @@ void OffAxisPointForce::computeSourceFourier(const Quad &myQuad,
 					double gauss_fact = exp( - pow(a, 2.) * pow(beta, 2.) / 4); //gaussian approximate delta in freq domain
 					//gauss_fact = 1.;
 						for (int idim = 0; idim < 3; idim++) {
-							if (idim == 0) {
+							//if (idim == 0) {
 								fouriers[ipnt](beta, idim) = Complex(
 									(1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
-								}
+						//		}
 
 				}
 			}

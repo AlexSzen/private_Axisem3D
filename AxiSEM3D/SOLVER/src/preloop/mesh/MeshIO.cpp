@@ -39,10 +39,13 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 
 
 	int elems_proc = 0, elems_proc_ani = 0, elemNus_proc = 0, elemNus_proc_ani = 0;
-
+        
+        /// also need to count the TOTAL number of elems, not only dumped ones.
+        int elems_proc_tot = 0;
 	for (int i = 0; i < domain.getNumElements(); i++) {
 		int maxNu = mMesh->getQuad(i)->getNu() + 1;
-		
+                
+		elems_proc_tot++;
 		if (domain.getElement(i)->needDumping(rmin,rmax,tmin,tmax)) {
 			elems_proc++;
 			elems_proc_ani++;
@@ -52,8 +55,10 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 	}
 	int elems_all = XMPI::sum(elems_proc);
 	int elems_all_ani = XMPI::sum(elems_proc_ani);
+        int elems_tot_all = XMPI::sum(elems_proc_tot);
 	int elemNus_all = XMPI::sum(elemNus_proc);
 	int elemNus_all_ani = XMPI::sum(elemNus_proc_ani);
+        
 	// ---------- </GENERAL> ----------
 		
 	// ---------- <GET FIELDS> ----------	
@@ -231,9 +236,10 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 	#ifdef _USE_PARALLEL_NETCDF // use parallel netcdf
 		if (XMPI::root()) { 
 			
-			std::vector<size_t> dimsElem, dimsElemGll, dimsElemNuGll;
+			std::vector<size_t> dimsElem, dimsElemTot, dimsElemGll, dimsElemNuGll;
 			
 			dimsElem.push_back(elems_all);	
+                        dimsElemTot.push_back(elems_tot_all);
 			dimsElemGll.push_back(elems_all);
 			dimsElemGll.push_back(nPntEdge);
 			dimsElemGll.push_back(nPntEdge);	
@@ -258,7 +264,7 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 			nc_writer.defModeOn();
 			nc_writer.defineVariable<int>("Nus", dimsElem);
 			nc_writer.defineVariable<int>("Nrs", dimsElem);
-			nc_writer.defineVariable<int>("domain_decomposition", dimsElem);
+			nc_writer.defineVariable<int>("domain_decomposition", dimsElemTot);
 			nc_writer.defineVariable<int>("element_mesh", dimsElem);
 			nc_writer.defineVariable<int>("sem_mesh", dimsElemGll);
 			nc_writer.defineVariable<Real>("mesh_S", dimsElemGll);
@@ -299,10 +305,11 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		nc_writer.writeVariableChunk("rho1D", rho1D, startElemNuGll_ani, countElemNuGll_ani);
 	
 	#else /// use serial netcdf 
-		std::vector<size_t> dimsElem, dimsElemGll, dimsElemNuGll;
+		std::vector<size_t> dimsElem, dimsElemTot, dimsElemGll, dimsElemNuGll;
 		std::vector<size_t> dimsElemAll; //this is just for domain decomposition, where each proc has the whole domain.
 		
 		dimsElemAll.push_back(elems_all);
+                dimsElemTot.push_back(elems_tot_all);
 		dimsElem.push_back(elems_proc);	
 		dimsElemGll.push_back(elems_proc);
 		dimsElemGll.push_back(nPntEdge);
@@ -342,7 +349,7 @@ void MeshIO::dumpFields(const Domain &domain, const Parameters &par) {
 		nc_writer.defineVariable<Real>("rho1D", dimsElemNuGll_ani);
 		
 		if (XMPI::root()) // we only need the domain decomposition on root 
-			nc_writer.defineVariable<int>("domain_decomposition", dimsElemAll);
+			nc_writer.defineVariable<int>("domain_decomposition", dimsElemTot);
 
 				
 		nc_writer.defModeOff();

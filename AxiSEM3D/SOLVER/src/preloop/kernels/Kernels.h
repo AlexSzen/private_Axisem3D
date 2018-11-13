@@ -21,7 +21,7 @@ public:
 	std::string verbose();
 	
 	static void buildInparam(Kernels *&kernels, const Parameters &par, int totalStepsSTF, int verbose);
-	void release(Domain &domain, Mesh &mesh, double deltaT);
+	void release(Domain &domain, Mesh &mesh, const Parameters &par, double deltaT); //actually need params for partial dumping
 	
 private:
 	
