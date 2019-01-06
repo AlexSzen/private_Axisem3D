@@ -17,13 +17,13 @@ def spz2xyz(s, z, phi) :
 
 class WavefieldComputer:
 
-    def __init__(self, wavefield, nu, nu2, s, z, sem_mesh):
+    def __init__(self, wavefield, nu, nu2, s, z):
         self.wvf = wavefield
         self.nu = nu
         self.nu2 = nu2 #for nu forward
         self.s = s
         self.z = z
-        self.sem_mesh = sem_mesh
+        #self.sem_mesh = sem_mesh
         self.nu_sum = np.cumsum(np.concatenate(([0],nu)))[:-1]
         self.r = np.sqrt(np.power(s,2.)+np.power(z,2.))
         self.num_steps = len(wavefield)
@@ -36,25 +36,24 @@ class WavefieldComputer:
         r_inner = 0.
         r_outer = 6.371e6
         phi = 0.
-
-        r_outer_closest = self.r[np.abs(self.r-r_outer).argmin()]
-        r_inner_closest = self.r[np.abs(self.r-r_inner).argmin()]
+        r_outer_closest = self.r[np.unravel_index(np.abs(self.r-r_outer).argmin(),self.r.shape)]
+        r_inner_closest = self.r[np.unravel_index(np.abs(self.r-r_inner).argmin(),self.r.shape)]
 
         intfact_slice = []
         x_slice = []
         y_slice = []
         z_slice = []
 
-		num_elems = len(self.nu)
-		nPntEdge = 5
+        num_elems = len(self.nu)
+        nPntEdge = 5
 
-		for ielem in range(num_elems):
-			for ipol in range(nPntEdge):
-				for jpol in range (nPntEdge):
+        for ielem in range(num_elems):
+            for ipol in range(nPntEdge):
+                for jpol in range (nPntEdge):
 
-					### If within range, create the point
-					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
-			            x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                    ### If within range, create the point
+                    if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
+                        x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
                         x_slice.append(x_p)
                         y_slice.append(y_p)
                         z_slice.append(z_p)
@@ -70,25 +69,25 @@ class WavefieldComputer:
         r_inner = 0.
         r_outer = 6.371e6
         phi = 0.
-
-        r_outer_closest = self.r[np.abs(self.r-r_outer).argmin()]
-        r_inner_closest = self.r[np.abs(self.r-r_inner).argmin()]
+        #print(np.abs(self.r-r_outer).argmin())
+        r_outer_closest = self.r[np.unravel_index(np.abs(self.r-r_outer).argmin(),self.r.shape)]
+        r_inner_closest = self.r[np.unravel_index(np.abs(self.r-r_inner).argmin(),self.r.shape)]
 
         nu_slice = []
         x_slice = []
         y_slice = []
         z_slice = []
 
-		num_elems = len(self.nu)
-		nPntEdge = 5
+        num_elems = len(self.nu)
+        nPntEdge = 5
 
-		for ielem in range(num_elems):
-			for ipol in range(nPntEdge):
-				for jpol in range (nPntEdge):
+        for ielem in range(num_elems):
+            for ipol in range(nPntEdge):
+                for jpol in range (nPntEdge):
 
-					### If within range, create the point
-					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
-			            x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                    ### If within range, create the point
+                    if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
+                        x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
                         x_slice.append(x_p)
                         y_slice.append(y_p)
                         z_slice.append(z_p)
@@ -100,8 +99,8 @@ class WavefieldComputer:
 
     def compute_slice(self, r_inner, r_outer, phi, comp):
 
-        r_outer_closest = self.r[np.abs(self.r-r_outer).argmin()]
-        r_inner_closest = self.r[np.abs(self.r-r_inner).argmin()]
+        r_outer_closest = self.r[np.unravel_index(np.abs(self.r-r_outer).argmin(),self.r.shape)]
+        r_inner_closest = self.r[np.unravel_index(np.abs(self.r-r_inner).argmin(),self.r.shape)]
 
         ### hacky numpy solution for wvf
         wvf_slice = np.zeros((self.num_steps,1), dtype = np.float32)
@@ -110,29 +109,33 @@ class WavefieldComputer:
         z_slice = []
         count = 0
 
-		num_elems = len(self.nu)
-		nPntEdge = 5
+        num_elems = len(self.nu)
+        nPntEdge = 5
 
-		for ielem in range(num_elems):
-			for ipol in range(nPntEdge):
-				for jpol in range (nPntEdge):
+        for ielem in range(num_elems):
+            for ipol in range(nPntEdge):
+                for jpol in range (nPntEdge):
 
-					### If within range, create the point
-					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
+                    ### If within range, create the point
+                    if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
 
                         nuelem = self.nu[ielem] #nu of this elem
                         nuelem2 = self.nu2[ielem] #nu of this elem
                         ind = self.nu_sum[ielem] #index in elem and fouriers dimension of the wavefield
-			            x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                        x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
                         x_slice.append(x_p)
                         y_slice.append(y_p)
                         z_slice.append(z_p)
 
                         ### hacky solution for the wavefield
                         if (count == 0):
-                            wvf_slice[:, count] = self.wvf[:,ind,comp, ipol, jpol]
+                            wvf_slice[:, count] = self.wvf[:, ind, comp, ipol, jpol]
                         else:
-                            wvf_slice = np.append(wvf_slice,self.wvf[:,ind,comp, ipol, jpol], axis = 1 )
+                            if self.wvf[:, ind, comp, ipol, jpol].shape == (1,): ###another hacky thing if only one time step
+                                wvf_slice = np.append(wvf_slice, np.expand_dims(self.wvf[:, ind, comp, ipol, jpol], axis=0), axis = 1 )
+                            else:
+                                wvf_slice = np.append(wvf_slice, self.wvf[:, ind, comp, ipol, jpol], axis = 1 )
+
 
 
                         for ialpha in range(1, max(nuelem,nuelem2)):
@@ -153,20 +156,20 @@ class WavefieldComputer:
 
             count = 0
 
-    		num_elems = len(self.nu)
-    		nPntEdge = 5
+            num_elems = len(self.nu)
+            nPntEdge = 5
 
-    		for ielem in range(num_elems):
-    			for ipol in range(nPntEdge):
-    				for jpol in range (nPntEdge):
+            for ielem in range(num_elems):
+                for ipol in range(nPntEdge):
+                    for jpol in range (nPntEdge):
 
-    					### If within range, create the point
-    					if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
+                        ### If within range, create the point
+                        if self.r[ielem, ipol, jpol] > r_inner_closest and self.r[ielem,ipol,jpol] < r_outer_closest:
 
                             nuelem = self.nu[ielem] #nu of this elem
                             nuelem2 = self.nu2[ielem] #nu of this elem
                             ind = self.nu_sum[ielem] #index in elem and fouriers dimension of the wavefield
-                            perimeter = ((phis[1]-phis[0])/360.) * 2 * np.pi * self.s[ielem; ipol, jpol] * 1e-6 #in thousand km
+                            perimeter = ((phis[1]-phis[0])/360.) * 2 * np.pi * self.s[ielem, ipol, jpol] * 1e-6 #in thousand km
                             n_shell_points = (perimeter*sample_density).astype(int)
 
 
@@ -175,7 +178,7 @@ class WavefieldComputer:
                             for isamp in range(n_shell_points):
                                 phi = phis[0] + isamp * (phis[1]-phis[0]) / n_shell_points
 
-    			                x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
+                                x_p, y_p, z_p = spz2xyz(self.s[ielem, ipol, jpol],self.z[ielem, ipol, jpol], phi)
                                 x_shell.append(x_p)
                                 y_shell.append(y_p)
                                 z_shell.append(z_p)

@@ -1,10 +1,13 @@
 ''' Input for wavefield animation '''
 
 #---------- <GENERAL> ----------
-INPUT_FILE = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/wavefield_db_fwd.nc4'
-INPUT_FILE2 = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernels_db.nc4'
-OUTPUT_DIR = '/home/alex/Desktop/phd/vtk/kernels/'
-OUTPUT_DIR_WISDOM = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/input/'
+INPUT_DIR_WVF = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/wavefields/'
+INPUT_DIR_KER = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/kernels/'
+
+INPUT_FILE = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/wavefields/wavefield_db_fwd.nc4'
+INPUT_FILE2 = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/kernels/kernels_db.nc4'
+OUTPUT_DIR = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/vtk/kernels/'
+OUTPUT_DIR_WISDOM = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/input/'
 
 START_TSTEP = 0 # Read the wavefield from this time step
 END_TSTEP = 1  # To this time step
@@ -38,7 +41,7 @@ PHIS_SHELLS = [[0., 1.], [0., 360.]] #Start and end azimuths of the shell.
 
 R = [3.2e6, 6.371e6] # Mean radius at which shell is computed. GLL points don't have exact radius, so plotted are all point within R_TOLERANCE of R.
 
-R_TOLERANCE = [100000, 10000.] # Spread of radius. 
+R_TOLERANCE = [100000, 10000.] # Spread of radius.
 
 SAMPLE_DENSITY = [10, 10] # Number of samples every thousand kilometers.
 
