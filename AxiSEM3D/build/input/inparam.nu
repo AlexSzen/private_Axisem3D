@@ -102,7 +102,7 @@ NU_EMP_DEPTH_END                            300.0
 # WHAT: on-off for learning
 # TYPE: bool
 # NOTE: Wisdom learning slows down the simulation, but does not affect results. 
-NU_WISDOM_LEARN                             false
+NU_WISDOM_LEARN                             true
 
 # WHAT: convergence threshold of wavefield learning 
 # TYPE: real
@@ -110,7 +110,7 @@ NU_WISDOM_LEARN                             false
 #       result will be. It does not affect performance of the learning simulation itself. 
 #       Allowed range   = [1e-5, 1e-1]
 #       Suggested range = [1e-4, 1e-2]
-NU_WISDOM_LEARN_EPSILON                     1e-1
+NU_WISDOM_LEARN_EPSILON                     1e-4
 
 # WHAT: interval for Wisdom learning
 # TYPE: integer
@@ -120,7 +120,7 @@ NU_WISDOM_LEARN_INTERVAL                    5
 # WHAT: a file to save the learned Wisdom
 # TYPE: string (path to file)
 # NOTE: format of each row -- s, z, learned_nu, starting_nu
-NU_WISDOM_LEARN_OUTPUT                      pf_tests.nu_wisdom.nc
+NU_WISDOM_LEARN_OUTPUT                      instaseis_test.nu_wisdom.nc
 
 # WHAT: a Wisdom file that will be used in the next simulation
 # TYPE: string (path to file)
@@ -133,7 +133,7 @@ NU_WISDOM_REUSE_INPUT                       pf_tests.nu_wisdom.nc
 # NOTE: adjust a Wisdom before using it. For example, a Wisdom learned with 
 #       s20rts can be safely applied to a simulation with s40rts by setting 
 #       NU_WISDOM_REUSE_FACTOR = 1.5
-NU_WISDOM_REUSE_FACTOR                      2.0
+NU_WISDOM_REUSE_FACTOR                      1.0
 
 
 

@@ -36,7 +36,7 @@ ATTENUATION_QKAPPA                          true
 #       candidate partitions on all processors is undoable due to memory limitation. 
 #       Try to use prime factors of the number of processors per node (RAM) on your HPC.
 #       Partitioning will be performed only on root if DD_PROC_INTERVAL >= nproc.
-DD_PROC_INTERVAL                            1
+DD_PROC_INTERVAL                            10
 
 # WHAT: number of candidate partitions per processor
 # TYPE: integer

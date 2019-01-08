@@ -4,9 +4,9 @@ time shift:      0.00
 half duration:   50.00
 latitude:       90.0
 longitude:      0.0
-depth:         00.0000
-Mrr:       0.0000e+30
-Mtt:       0.0e+30
+depth:         100.0000
+Mrr:       1.0000e+30
+Mtt:       1.0e+30
 Mpp:      1.00000e+30
 Mrt:       0.00000e+23
 Mrp:      0.00000e+23

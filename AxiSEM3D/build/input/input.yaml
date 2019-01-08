@@ -8,7 +8,7 @@ basic:
     model: "prem_ani"
 
     # The desired dominant period of the mesh.
-    period: 150
+    period: 50
 
 
 # Advanced parameters for more control.
