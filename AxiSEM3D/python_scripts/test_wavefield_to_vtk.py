@@ -37,7 +37,7 @@ print("Start")
 dset_fwd = Dataset(INPUT_FILE)
 dset_ker = Dataset(INPUT_FILE2)
 
-#wavefield = dset_fwd.variables["displacement_wavefield"][START_TSTEP:END_TSTEP:INT_TSTEP] #domain decomposed wavefield.
+wavefield = dset_fwd.variables["displacement_wavefield"][START_TSTEP:END_TSTEP:INT_TSTEP] #domain decomposed wavefield.
 kernels = dset_ker.variables["Kernels"][START_TSTEP:END_TSTEP:INT_TSTEP]
 sem_mesh = dset_fwd.variables["sem_mesh"][:] #for each point contains global point tag
 s = dset_fwd.variables["mesh_S"][:]

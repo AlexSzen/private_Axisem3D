@@ -1,9 +1,9 @@
 from netCDF4 import Dataset 
 import numpy as np
 
-wvf_dir = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/'
+wvf_dir = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/instaseis_axisem3D/'
 wvf_name_merged = 'wavefield_db_fwd.nc4'
-num_procs = 10
+num_procs = 1200
 
 
 totNus = 0
@@ -29,7 +29,7 @@ print(grandTotElems)
 print(len_time)
 f_merged = Dataset(wvf_dir + wvf_name_merged, "w", "NETCDF4")
 
-
+'''
 f_merged.createDimension("ncdim_%s"%len_time, len_time)
 f_merged.createDimension("ncdim_%s"%totElems, totElems)
 f_merged.createDimension("ncdim_%s"%totNus, totNus)
@@ -44,8 +44,9 @@ f_merged.createDimension('gll_points', 5)
 f_merged.createDimension('comp', 6)
 f_merged.createDimension('grand_tot_elems', grandTotElems)
 
-'''
 
+
+'''
 merged_wvf = f_merged.createVariable("displacement_wavefield", "f8", ("ncdim_%s"%len_time,"ncdim_%s"%totNus, "ncdim_6", "ncdim_5", "ncdim_5") )
 merged_nus = f_merged.createVariable("Nus", "i", ("ncdim_%s"%totElems) )
 merged_nrs = f_merged.createVariable("Nrs", "i", ("ncdim_%s"%totElems) )
@@ -61,7 +62,7 @@ merged_dd = f_merged.createVariable("domain_decomposition", "i", ('grand_tot_ele
 merged_s = f_merged.createVariable("mesh_S", "f8", ('tot_elems', 'gll_points', 'gll_points') )
 merged_z = f_merged.createVariable("mesh_Z", "f8", ('tot_elems', 'gll_points', 'gll_points') )
 merged_sem = f_merged.createVariable("sem_mesh", "i", ('tot_elems', 'gll_points', 'gll_points') )
-'''
+
 
 
 pos_nu = 0

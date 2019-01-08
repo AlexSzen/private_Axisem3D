@@ -12,8 +12,8 @@ for adjoint sources : time windows, filters, measurement types,...
 
 ########## GENERAL  ##########
 
-STATIONS_PATH = '/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/input/STATIONS' #path of STATIONS file for AxiSEM3D input. Used to get names and location of adjoint sources
-OUTPUT_PATH = '/home/alex/Desktop/phd/axisem3d_alex/AxiSEM3D/build/input/' # should be path of AxiSEM3D input
+STATIONS_PATH = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/input/STATIONS' #path of STATIONS file for AxiSEM3D input. Used to get names and location of adjoint sources
+OUTPUT_PATH = '/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/input/' # should be path of AxiSEM3D input
 NUM_SOURCES = 1 #Number of adjoint sources. If NUM_SOURCES < number of receivers in STATIONS file, only first NUM_SOURCES will be used. 
 NUM_FILTERS = 1
 ########## GENERAL  ##########
@@ -35,7 +35,7 @@ NUM_MEASUREMENTS = [1,1,1,1,1]
 windows (in seconds) are a list of tuples. 
 '''
 
-WINDOWS = [[(560.,760.)],[(580., 720.)],[(160., 260.)], [(150., 170.)],[(150., 170.)],[(150., 170.)]]
+WINDOWS = [[(700.,820.)],[(580., 720.)],[(160., 260.)], [(150., 170.)],[(150., 170.)],[(150., 170.)]]
 
 
 ########## TIME WINDOWS ##########
