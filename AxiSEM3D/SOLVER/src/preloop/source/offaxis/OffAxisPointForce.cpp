@@ -48,6 +48,7 @@ void OffAxisPointForce::computeSourceFourier(const Quad &myQuad,
 	std::cout << nu<<std::endl;
 
 	//a = 0.7;
+    // TODO: use mThetaSrc to fill in idim==0 and idim==2 (s and z) so that we have a vertical point force 
 	for (int ipol = 0; ipol <= nPol; ipol++) {
         for (int jpol = 0; jpol <= nPol; jpol++) {
             int ipnt = ipol * nPntEdge + jpol;
@@ -55,13 +56,19 @@ void OffAxisPointForce::computeSourceFourier(const Quad &myQuad,
 				for (int beta = 0; beta <= nu; beta++) {
 					double gauss_fact = exp( - pow(a, 2.) * pow(beta, 2.) / 4); //gaussian approximate delta in freq domain
 					//gauss_fact = 1.;
-						for (int idim = 0; idim < 3; idim++) {
-							//if (idim == 0) {
+					/*	for (int idim = 0; idim < 3; idim++) {
+							if (idim == 0) {
 								fouriers[ipnt](beta, idim) = Complex(
 									(1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
-						//		}
+								}
+                            }*/
+                        // create a (local) vertical point force.
+                        fouriers[ipnt](beta, 0) = sin(mThetaSrc) * Complex(
+                            (1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
+                        fouriers[ipnt](beta, 2) = cos(mThetaSrc) * Complex(
+                            (1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
 
-				}
+				                    
 			}
 		}
     }
