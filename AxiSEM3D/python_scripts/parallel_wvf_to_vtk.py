@@ -19,7 +19,7 @@ from multiprocessing import Pool
 #---------- <INPUT AND OUTPUT> ----------
 
 
-NUM_CORES = 2
+NUM_CORES = 10
 
 if (SLICES):
     if not os.path.exists(OUTPUT_DIR+"slices"):
@@ -30,8 +30,13 @@ if (SHELLS):
         os.makedirs(OUTPUT_DIR+"shells")
 
 
-list_files_ker = [f for f in sorted(os.listdir(INPUT_DIR_KER)) if 'kernels_db' in f]
-list_files_wvf = [f for f in sorted(os.listdir(INPUT_DIR_WVF)) if 'wavefield_db_fwd' in f]
+list_files_ker = [f for f in sorted(os.listdir(INPUT_DIR_KER)) if 'kernels_db_' in f]
+### this one for 3d perturb
+#list_files_wvf = [f for f in sorted(os.listdir(INPUT_DIR_WVF)) if 'wavefield_db_' in f and 'fwd' not in f and '3d' not in f]
+###this one for other perturb
+#list_files_wvf = [f for f in sorted(os.listdir(INPUT_DIR_WVF)) if '3d' in f ]
+###this one for kernel i guess 
+list_files_wvf = [f for f in sorted(os.listdir(INPUT_DIR_WVF)) if 'wavefield_db_fwd' in f ]
 
 if (len(list_files_ker) != len(list_files_wvf)):
     raise ValueError('Inconsistent number of wvf and kernel files')
@@ -55,6 +60,9 @@ def netcdf2txt(INPUT_FILE):
     # TODO: need to fix this in C++ code, add a timestep even if integrated kernel, for compatibility.
     kernels = np.expand_dims(dset_ker.variables["Kernels"][:], axis = 0)
 
+    vp_temp = dset_fwd.variables['vp'][:] - dset_fwd.variables['vp1D'][:]
+    vp_pert = np.expand_dims(vp_temp, axis = 0) # allows to treat it as a wvf
+
     #sem_mesh = dset_fwd.variables["sem_mesh"][:] #for each point contains global point tag
     s = dset_fwd.variables["mesh_S"][:]
     z = dset_fwd.variables["mesh_Z"][:]
@@ -74,8 +82,8 @@ def netcdf2txt(INPUT_FILE):
     #---------- <CREATE VTK FILE> ----------
 
     wc = WavefieldComputer(kernels, nuKer, nuKer, s, z)
-    #wc = WavefieldComputer(vp, nu, nu, s, z, sem_mesh)
-    #wc = WavefieldComputer(wavefield,nu,nu,s,z,sem_mesh)
+    #wc = WavefieldComputer(vp_pert, nu, nu, s, z)
+    #wc = WavefieldComputer(wavefield,nu,nu,s,z)
 
 
     if PLOT_NU:
@@ -85,8 +93,17 @@ def netcdf2txt(INPUT_FILE):
     #    f_coords = open(OUTPUT_DIR + 'coords_' + str(NUM_FILE)+'.txt','w')
 #        f_coords.write(points_slice)
 #        f_coords.close()
+
+        ### Make sure we remove existing files
+        if os.path.exists(OUTPUT_DIR +'/slices/'+ 'coords_nu_' + str(NUM_FILE)+'.txt'):
+            os.remove(OUTPUT_DIR +'/slices/'+ 'coords_nu_' + str(NUM_FILE)+'.txt')
+        if os.path.exists(OUTPUT_DIR +'/slices/'+ 'values_nu_' + str(NUM_FILE)+'.txt'):
+            os.remove(OUTPUT_DIR +'/slices/'+ 'values_nu_' + str(NUM_FILE)+'.txt')
+            
         np.savetxt(OUTPUT_DIR +'/slices/'+ 'coords_nu_' + str(NUM_FILE)+'.txt', points_slice)
         np.savetxt(OUTPUT_DIR +'/slices/'+ 'values_nu_' + str(NUM_FILE)+'.txt', nu_slice, fmt='%i', newline = ' ')
+        
+        ### This overwrites the file directly
         with open(OUTPUT_DIR +'/slices/'+ 'num_points_nu_' + str(NUM_FILE)+'.txt','w') as f:
             f.write(str(numpoints_slice))
 
@@ -97,10 +114,24 @@ def netcdf2txt(INPUT_FILE):
         numpoints_slice = len(x_slice)
 
         for it in range(num_steps):
+
+            ### Make sure we remove existing files
+            if os.path.exists(OUTPUT_DIR +'/slices/' + 'coords_slice_' + str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_'
+            + str(PHIS_SLICES[i_slice]) + '_'+ str(it) + '_' + str(NUM_FILE) + '.txt'):
+                os.remove(OUTPUT_DIR +'/slices/' + 'coords_slice_' + str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_'
+                + str(PHIS_SLICES[i_slice]) + '_'+ str(it) + '_' + str(NUM_FILE) + '.txt')
+            if os.path.exists(OUTPUT_DIR +'/slices/'+ 'values_slice_' + str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_'
+            + str(PHIS_SLICES[i_slice]) + '_'+ str(it) + '_' + str(NUM_FILE) + '.txt'):
+                os.remove(OUTPUT_DIR +'/slices/'+ 'values_slice_' + str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_'
+                + str(PHIS_SLICES[i_slice]) + '_'+ str(it) + '_' + str(NUM_FILE) + '.txt')   
+                         
+            ### Save values
             np.savetxt(OUTPUT_DIR +'/slices/' + 'coords_slice_' + str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_'
             + str(PHIS_SLICES[i_slice]) + '_'+ str(it) + '_' + str(NUM_FILE) + '.txt', points_slice)
             np.savetxt(OUTPUT_DIR +'/slices/'+ 'values_slice_' + str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_'
             + str(PHIS_SLICES[i_slice]) + '_'+ str(it) + '_' + str(NUM_FILE) + '.txt', wvf_slice, newline = ' ')
+            
+            ### This overwrites the file directly
             with open(OUTPUT_DIR +'/slices/'+ 'num_points_slice_' + str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_'
             + str(PHIS_SLICES[i_slice]) + '_'+ str(it) + '_' + str(NUM_FILE) + '.txt','w') as f:
                 f.write(str(numpoints_slice))

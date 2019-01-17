@@ -137,7 +137,6 @@ class WavefieldComputer:
                                 wvf_slice = np.append(wvf_slice, self.wvf[:, ind, comp, ipol, jpol], axis = 1 )
 
 
-
                         for ialpha in range(1, max(nuelem,nuelem2)):
                             expval =  2 * np.exp(np.deg2rad(phi)*ialpha*1j)
                             gauss_fact = np.exp(-np.power(self.a,2.) * np.power(ialpha, 2.)/4.)
