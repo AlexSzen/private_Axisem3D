@@ -53,18 +53,21 @@ mName(name), mNetwork(network), mDepth(depth) {
         double off_axis_theta_lat = Geodesy::theta2Lat_d(off_axis_rtpG(1), mDepth);
         double off_axis_phi_lon = Geodesy::phi2Lon(off_axis_rtpG(2));
         double off_axis_depth = mDepth;
-
+/*
+        if (XMPI::rank()==0) {
         //write rotated receivers for point force test
-        std::std::ofstream myfile(Parameters::sInputDirectory + "rotated_stations_+"+str(XMPI::rank())+".txt", std::ios::out);
-        if (myfile.is_open()) {
-            myfile << "New receiver "<< mName <<" is latitude: "<< off_axis_theta_lat
-            << " longitude "<<off_axis_phi_lon<< " and depth "<<mDepth<<"\n";
-            myfile.close();
+            std::ofstream myfile(Parameters::sInputDirectory + "/rotated_stations.txt", std::ios_base::app);
+        
+            if (myfile.is_open()) {
+                myfile << mName <<"\t" << mNetwork << "\t" << off_axis_theta_lat
+                << "\t" << off_axis_phi_lon << "\t" << 0. << "\t" <<mDepth<<"\n";
+                myfile.close();
+            }
         }
         XMPI::cout<<"New receiver "<< mName <<" is latitude: "<< off_axis_theta_lat<< " longitude "<<off_axis_phi_lon<< " and depth "<<mDepth<<XMPI::endl;
 
         //TODO:save this to file STATIONS_ADJ_PFTEST
-
+*/
 
     } else {
         rtpS(0) = 1.;
