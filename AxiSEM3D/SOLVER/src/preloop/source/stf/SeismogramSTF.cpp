@@ -41,12 +41,12 @@ mHalfDuration(hdur_fwd), mDecay(decay_fwd) {
 		Processor::derivate(trace_measurement_F_vel); //disable for misfit test
 		Processor::derivate(trace_measurement_F_accel); //disable for misfit test
 		Processor::derivate(trace_measurement_F_accel); //disable for misfit test
-		Processor::filter(trace_measurement_F_vel, filter_types[i_measurement]);
-		Processor::filter(trace_measurement_F_accel, filter_types[i_measurement]);
+	//	Processor::filter(trace_measurement_F_vel, filter_types[i_measurement]);
+	//	Processor::filter(trace_measurement_F_accel, filter_types[i_measurement]);
 		Processor::transformF2T(trace_measurement_F_vel, trace_measurement_T_vel);
 		Processor::transformF2T(trace_measurement_F_accel, trace_measurement_T_accel);
 		Processor::taper(trace_measurement_T_vel, (Real) window(0), (Real) window(1));
-		Processor::taper(trace_measurement_T_accel, (Real) window(0), (Real) window(1));
+	//	Processor::taper(trace_measurement_T_accel, (Real) window(0), (Real) window(1));
 		Processor::taper(trace_measurement_T_disp, (Real) window(0), (Real) window(1));
 
 		Real norm_s = 0.;
@@ -59,7 +59,9 @@ mHalfDuration(hdur_fwd), mDecay(decay_fwd) {
       
 		for (int it = 0; it <= nStep; it++) { //normalization factor : for traveltime tomo it's time integrated squared velocity
 											 // for amplitude it's displacement
-			norm_s += mDeltaT * trace_measurement_T_vel(it, 0) * trace_measurement_T_vel(it, 0);
+	//		norm_s += mDeltaT * trace_measurement_T_vel(it, 0) * trace_measurement_T_vel(it, 0);
+            norm_s += - mDeltaT * trace_measurement_T_disp(it, 0) * trace_measurement_T_accel(it, 0);
+
 			norm_p += mDeltaT * trace_measurement_T_vel(it, 1) * trace_measurement_T_vel(it, 1);
 			norm_z += mDeltaT * trace_measurement_T_vel(it, 2) * trace_measurement_T_vel(it, 2);
 		}

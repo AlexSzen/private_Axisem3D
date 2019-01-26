@@ -1,13 +1,14 @@
 ''' Input for wavefield animation '''
-
+import os
+home = os.getenv("HOME")
 #---------- <GENERAL> ----------
-INPUT_DIR_WVF = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/wavefields/'
-INPUT_DIR_KER = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/kernels/'
+INPUT_DIR_WVF = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/'
+INPUT_DIR_KER = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernel_nu100_70deg_mystf/'
 
-INPUT_FILE = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/wavefields/wavefield_db_fwd.nc4'
-INPUT_FILE2 = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/output/kernels/kernels_db.nc4'
-OUTPUT_DIR = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/vtk/kernels/'
-OUTPUT_DIR_WISDOM = '/Users/alex/Desktop/PhD/private_Axisem3D/AxiSEM3D/build/input/'
+INPUT_FILE = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/wavefield_db_fwd.nc4'
+INPUT_FILE2 = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernels_db.nc4'
+OUTPUT_DIR = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/vtk/kernels/'
+OUTPUT_DIR_WISDOM = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/input/'
 
 START_TSTEP = 0 # Read the wavefield from this time step
 END_TSTEP = 1  # To this time step
