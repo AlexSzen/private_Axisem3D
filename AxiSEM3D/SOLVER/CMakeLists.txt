@@ -19,20 +19,20 @@ SET(CMAKE_Fortran_COMPILER     mpif90)
 
 # external packages
 # uncomment and edit the following lines to specify preferred prefix
- SET(EIGEN3_ROOT           /home/alex/axisem3d_depends/eigen3)
-# SET(FFTW_ROOT             edit_here)
- SET(BOOST_ROOT            /home/alex/axisem3d_depends/boost)
-# SET(METIS_ROOT            edit_here)
+SET(EIGEN3_ROOT           /Users/alex/axisem3d_depends/eigen3)
+SET(FFTW_ROOT             /Users/alex/anaconda3/envs/ax3d)
+SET(BOOST_ROOT            /Users/alex/axisem3d_depends/boost)
+SET(METIS_ROOT            /Users/alex/anaconda3/envs/ax3d)
 
-SET(HDF5_ROOT             /home/alex/anaconda2/)
-SET(NETCDF_ROOT           /opt/pnetcdf/)
-SET(NETCDF_INCLUDE_DIR           /opt/pnetcdf/include/)
-SET(NETCDF_LIBRARIES          /opt/pnetcdf/lib/libnetcdf.so	)
+#SET(HDF5_ROOT             /home/alex/anaconda2/)
+SET(NETCDF_ROOT           /Users/alex/anaconda3/envs/ax3d)
+#SET(NETCDF_INCLUDE_DIR           /opt/pnetcdf/include/)
+#SET(NETCDF_LIBRARIES          /opt/pnetcdf/lib/libnetcdf.so	)
 # polynomial order of spectral elements (from 1 to 8)
 SET(NPOL 4)
 
 # solver precision
-SET(USE_DOUBLE TRUE)
+SET(USE_DOUBLE FALSE)
 
 # use parallel NetCDF or not
 # Modules that require parallel NetCDF: 
@@ -42,7 +42,7 @@ SET(USE_PARALLEL_NETCDF FALSE)
 
 # additional libraries to link with
 # such as HDF5 when NetCDF is built with --disable-shared (e.g., the parallel build)
-# SET(ADDITIONAL_LIBS "-L$ENV{HOME}/axisem3d_depends/parhdf5/lib -lhdf5 -lhdf5_hl -lcurl")
+#SET(ADDITIONAL_LIBS "-L$ENV{HOME}/axisem3d_depends/parhdf5/lib -lhdf5 -lhdf5_hl -lcurl")
 
 # directory to store FFTW wisdom files
 # Specify any directory that does not require a `sudo` to write.

@@ -1,6 +1,6 @@
 // Receiver.cpp
-// created by Kuangdai on 13-May-2016 
-// receiver   
+// created by Kuangdai on 13-May-2016
+// receiver
 
 #include "Receiver.h"
 #include "XMath.h"
@@ -11,13 +11,14 @@
 #include "Element.h"
 #include "SpectralConstants.h"
 #include "PointwiseRecorder.h"
+#include "Parameters.h"
 
 #include <sstream>
 #include <iomanip>
 #include "XMPI.h"
 
-Receiver::Receiver(const std::string &name, const std::string &network, 
-    double theta_lat, double phi_lon, bool geographic, 
+Receiver::Receiver(const std::string &name, const std::string &network,
+    double theta_lat, double phi_lon, bool geographic,
     double depth, double srcLat, double srcLon, double srcDep):
 mName(name), mNetwork(network), mDepth(depth) {
     RDCol3 rtpG, rtpS;
@@ -26,38 +27,45 @@ mName(name), mNetwork(network), mDepth(depth) {
         rtpG(1) = Geodesy::lat2Theta_d(theta_lat, mDepth);
         rtpG(2) = Geodesy::lon2Phi(phi_lon);
         rtpS = Geodesy::rotateGlob2Src(rtpG, srcLat, srcLon, srcDep);
-        
+
         // For off axis point force tests, during normal (axial) simulation,
-        // get coordinates of equivalent receiver for the off axis simulation with 
+        // get coordinates of equivalent receiver for the off axis simulation with
         // off axis source at given source centered theta and phi.
-        
-        // convert to cartesian coords 
+
+        // convert to cartesian coords
         RDCol3 xyzG = Geodesy::toCartesian(rtpG);
-        
-        // theta and phi of off axis source, in source-centered coords.
+
+        // theta and phi of off axis source (here on the equator), in source-centered coords.
         double off_axis_theta = pi/2;
         double off_axis_phi = 0.;
-        
-        // rotation matrix 
+
+        // rotation matrix
         RDMat33 rot_matrix = Geodesy::rotationMatrix(off_axis_theta, off_axis_phi);
-        
-        // rotate cartesian coords 
+
+        // rotate cartesian coords
         RDCol3 off_axis_xyzG = rot_matrix * xyzG;
-        
-        // convert to spherical 
+
+        // convert to spherical
         bool defined;
         RDCol3 off_axis_rtpG = Geodesy::toSpherical(off_axis_xyzG, defined);
-        
-        // convert to geographic 
+
+        // convert to geographic
         double off_axis_theta_lat = Geodesy::theta2Lat_d(off_axis_rtpG(1), mDepth);
         double off_axis_phi_lon = Geodesy::phi2Lon(off_axis_rtpG(2));
         double off_axis_depth = mDepth;
-        
+
+        //write rotated receivers for point force test
+        std::std::ofstream myfile(Parameters::sInputDirectory + "rotated_stations_+"+str(XMPI::rank())+".txt", std::ios::out);
+        if (myfile.is_open()) {
+            myfile << "New receiver "<< mName <<" is latitude: "<< off_axis_theta_lat
+            << " longitude "<<off_axis_phi_lon<< " and depth "<<mDepth<<"\n";
+            myfile.close();
+        }
         XMPI::cout<<"New receiver "<< mName <<" is latitude: "<< off_axis_theta_lat<< " longitude "<<off_axis_phi_lon<< " and depth "<<mDepth<<XMPI::endl;
-        
+
         //TODO:save this to file STATIONS_ADJ_PFTEST
-        
-        
+
+
     } else {
         rtpS(0) = 1.;
         rtpS(1) = theta_lat * degree;
@@ -70,11 +78,11 @@ mName(name), mNetwork(network), mDepth(depth) {
     mLon = Geodesy::phi2Lon(rtpG(2));
     mBackAzimuth = Geodesy::backAzimuth(srcLat, srcLon, srcDep, mLat, mLon, mDepth);
     // // test
-    // XMPI::cout << name << " " << network << " "; 
+    // XMPI::cout << name << " " << network << " ";
     // XMPI::cout << mLat << " " << mLon << " " << " 0.0 " << mDepth << XMPI::endl;
 }
 
-void Receiver::release(PointwiseRecorder &recorderPW, const Domain &domain, 
+void Receiver::release(PointwiseRecorder &recorderPW, const Domain &domain,
     int elemTag, const RDMatPP &interpFact) {
     Element *myElem = domain.getElement(elemTag);
     recorderPW.addReceiver(mName, mNetwork, mPhi, interpFact, myElem, mTheta, mBackAzimuth,
@@ -101,10 +109,10 @@ bool Receiver::locate(const Mesh &mesh, int &elemTag, RDMatPP &interpFact) const
             if (std::abs(srcXiEta(0)) <= 1.000001 && std::abs(srcXiEta(1)) <= 1.000001) {
                 elemTag = quad->getElementTag();
                 RDColP interpXi, interpEta;
-                XMath::interpLagrange(srcXiEta(0), nPntEdge, 
-                    quad->isAxial() ? SpectralConstants::getP_GLJ().data(): 
+                XMath::interpLagrange(srcXiEta(0), nPntEdge,
+                    quad->isAxial() ? SpectralConstants::getP_GLJ().data():
                     SpectralConstants::getP_GLL().data(), interpXi.data());
-                XMath::interpLagrange(srcXiEta(1), nPntEdge, 
+                XMath::interpLagrange(srcXiEta(1), nPntEdge,
                     SpectralConstants::getP_GLL().data(), interpEta.data());
                 interpFact = interpXi * interpEta.transpose();
                 return true;
@@ -128,4 +136,3 @@ std::string Receiver::verbose(bool geographic, int wname, int wnet) const {
     ss << mDepth;
     return ss.str();
 }
-
