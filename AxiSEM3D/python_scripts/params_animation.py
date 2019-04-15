@@ -3,7 +3,7 @@ import os
 home = os.getenv("HOME")
 #---------- <GENERAL> ----------
 INPUT_DIR_WVF = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/'
-INPUT_DIR_KER = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernel_nu100_70deg_mystf/'
+INPUT_DIR_KER = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/'
 
 INPUT_FILE = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/wavefield_db_fwd.nc4'
 INPUT_FILE2 = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernels_db.nc4'
@@ -21,7 +21,7 @@ PLOT_INTFACT = 0
 #---------- </GENERAL> ----------
 
 #---------- <PARAMETERS FOR SLICES> ----------
-SLICES = 1 # Number of slices to make from the list below.
+SLICES = 2 # Number of slices to make from the list below.
 
 PHIS_SLICES = [0, 180] # Azimuth of the slice.
 

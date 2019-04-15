@@ -20,8 +20,8 @@ import os
 
 ##### INPUTS #####
 home = os.getenv("HOME")
-INPUT_DIR_WVF = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/bubble_500km_0.06_2200km/'
-INPUT_DIR_KER = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernel_nu100_70deg_mystf/'
+INPUT_DIR_WVF = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/wavefields/bubble_650km_0.04_2200km/'
+INPUT_DIR_KER = home+'/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/kernels/kernel_nu100_90deg_mystf_nodoubletaper/'
 
 list_files_ker = [f for f in sorted(os.listdir(INPUT_DIR_KER)) if 'kernels_db_' in f]
 #list_files_wvf = [f for f in sorted(os.listdir(INPUT_DIR_WVF)) if '3d_wavefield_db' in f ]
