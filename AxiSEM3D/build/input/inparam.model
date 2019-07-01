@@ -14,7 +14,7 @@
 # WHAT: exodus file created by salvus_mesher
 # TYPE: string (path to file)
 # NOTE: mesh + 1D reference model
-MODEL_1D_EXODUS_MESH_FILE                   AxiSEM_prem_ani_one_crust_50.e
+MODEL_1D_EXODUS_MESH_FILE                   AxiSEM_prem_iso_50.e
 
 
 
@@ -29,8 +29,8 @@ MODEL_3D_VOLUMETRIC_NUM                     0
 # TYPE: list of ParSeries <see top notes>
 # NOTE: The order in this list DOES matter, because a model may be based on previously
 #       defined ones or/and overwrite previous ones when they overlap in space.
-MODEL_3D_VOLUMETRIC_LIST                    bubble$VP$ref1D$0.02$100.0$2200.0$55.0$0.0$false$true$10.0
-#MODEL_3D_VOLUMETRIC_LIST                    cylinder$VP$ref1D$.05$400$0.$55.0$0.0$4000.0$55.0$0.0$false$true$100.0$100.0
+#MODEL_3D_VOLUMETRIC_LIST                    bubble$VP$ref1D$0.06$500.0$2200.0$45.0$0.0$false$true$10.0
+MODEL_3D_VOLUMETRIC_LIST                    cylinder$VP$ref1D$.02$500$0.$45.0$0.0$4000.0$55.0$0.0$false$true$50.0$50.0
 
 
 # WHAT: number of geometric 3D models

@@ -38,13 +38,13 @@ SHELLS = 0 # Number of shells to make from the list below.
 
 INNER_OUTER = ["inner", "outer"] #Inner or outer shell.
 
-PHIS_SHELLS = [[0., 1.], [0., 360.]] #Start and end azimuths of the shell.
+PHIS_SHELLS = [[-45., 45.], [0., 360.]] #Start and end azimuths of the shell.
 
-R = [3.2e6, 6.371e6] # Mean radius at which shell is computed. GLL points don't have exact radius, so plotted are all point within R_TOLERANCE of R.
+R = [4.5e6, 6.371e6] # Mean radius at which shell is computed. GLL points don't have exact radius, so plotted are all point within R_TOLERANCE of R.
 
 R_TOLERANCE = [100000, 10000.] # Spread of radius.
 
 SAMPLE_DENSITY = [10, 10] # Number of samples every thousand kilometers.
 
-COMP_SHELLS = [4,4]
+COMP_SHELLS = [0,0]
 #---------- </PARAMETERS FOR SHELLS> ----------

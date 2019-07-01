@@ -67,8 +67,8 @@ void Processor::createFilters(const RMatXX &filter_params) {
 	sNumFilters = filter_params.rows();
 	sFilters = RMatXX(sNumFilters, sFreq.size());
 	for (int ifilt = 0; ifilt < sNumFilters; ifilt++) {
-	//	Filters::logGabor(sFilters, sFreq, one / filter_params(ifilt, 0), filter_params(ifilt, 1), ifilt);
-		Filters::butterLowpass(sFilters, sFreq, one / filter_params(ifilt, 0), filter_params(ifilt, 1), ifilt);
+		Filters::logGabor(sFilters, sFreq, one / filter_params(ifilt, 0), filter_params(ifilt, 1), ifilt);
+	//	Filters::butterLowpass(sFilters, sFreq, one / filter_params(ifilt, 0), filter_params(ifilt, 1), ifilt);
 	}
 	
 }
@@ -89,8 +89,9 @@ void Processor::taper(RMatX3 &trace, Real begWin, Real endWin) {
 	if (trace.rows() != sTime.size()) throw std::runtime_error("Processor::taper || Error : trace and taper have different sizes.");
 	
 	RColX taper;
+    int ntaper = 50;
 	Tapers::cosineTaper(taper, sTime, begWin, endWin);
-		
+	//Tapers::expTaper(taper, sTime, begWin, endWin, ntaper);	
 	for (int it = 0; it < trace.rows(); it++) {
 		for (int ic = 0; ic < trace.cols(); ic++) {
 			trace(it, ic) *= taper(it);

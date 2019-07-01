@@ -5,7 +5,7 @@ mesh_type: AxiSEM
 basic:
     # Model Name for predefined models or filename for external model
     # file.
-    model: "prem_ani"
+    model: "prem_iso"
 
     # The desired dominant period of the mesh.
     period: 50
@@ -15,7 +15,7 @@ basic:
 advanced:
     # Number of elements per wavelength. Used to calculate element
     # sizes to satisfy the desired dominant period.
-    elements_per_wavelength: 1.2
+    elements_per_wavelength: 1.5
 
     # Courant Number used to estimate dt.
     courant_number: 0.6

@@ -24,7 +24,7 @@ ATTENUATION_SPECFEM_LEGACY                  false
 # WHAT: whether to consider Q_Kappa or not
 # TYPE: bool 
 # NOTE: must be turned off if ATTENUATION_SPECFEM_LEGACY = true
-ATTENUATION_QKAPPA                          true
+ATTENUATION_QKAPPA                          false
 
 
 
@@ -80,7 +80,7 @@ DEVELOP_NON_SOURCE_MODE                     false
 # WHAT: diagnose preprocessing runtime
 # TYPE: bool
 # NOTE: see results in output/develop/preloop_timer.txt
-DEVELOP_DIAGNOSE_PRELOOP                    false
+DEVELOP_DIAGNOSE_PRELOOP                    true
 
 # WHAT: dump cost measurements for elements and points
 # TYPE: bool

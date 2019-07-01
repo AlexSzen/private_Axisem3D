@@ -4,7 +4,7 @@
 # WHAT : kernel computation 
 # TYPE : bool
 # NOTE : for kernel computation you need a file wavefield_db_fwd.nc4 in output/wavefields/
-COMPUTE_KERNELS 	false
+COMPUTE_KERNELS 	true
 
 # WHAT : type of kernels to compute 
 # TYPE : Krho Kvp Kvs Kvsh Kvsv Kvph Kvpv Keta

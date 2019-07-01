@@ -34,7 +34,7 @@ NU_FFTW_LUCKY_NUMBER                        true
 # WHAT: the constant value to be used when NU_TYPE = constant
 # TYPE: integer
 # NOTE: NU_CONST = 2 is necessary and sufficient for 1D and 2D in-plane simulations.
-NU_CONST                                    2
+NU_CONST                                    50
 
 
 

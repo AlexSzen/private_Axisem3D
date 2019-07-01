@@ -19,7 +19,7 @@ from multiprocessing import Pool
 #---------- <INPUT AND OUTPUT> ----------
 
 
-NUM_CORES = 10
+NUM_CORES = 20
 
 if (SLICES):
     if not os.path.exists(OUTPUT_DIR+"slices"):
@@ -30,7 +30,7 @@ if (SHELLS):
         os.makedirs(OUTPUT_DIR+"shells")
 
 
-list_files_ker = [f for f in sorted(os.listdir(INPUT_DIR_KER)) if 'kernels_db_' in f]
+list_files_ker = [f for f in sorted(os.listdir(INPUT_DIR_KER)) if '30deg_kernels_db_' in f]
 ### this one for 3d perturb
 #list_files_wvf = [f for f in sorted(os.listdir(INPUT_DIR_WVF)) if 'wavefield_db_' in f and 'fwd' not in f and '3d' not in f]
 ###this one for other perturb
@@ -46,6 +46,7 @@ list_files_input = list(zip(list_files_ker,list_files_wvf, list(range(num_files)
 
 num_steps = int((END_TSTEP - START_TSTEP)/INT_TSTEP)
 
+slice_name = '30_deg_ker_'
 #---------- </INPUT AND OUTPUT> ----------
 
 #---------- <LOAD VARIABLES> ----------
@@ -221,7 +222,7 @@ if __name__ == "__main__" :
                 + str(PHIS_SLICES[i_slice]) + '_'+ str(it) in f]
 
                 ### If I split the name on several lines I get an error wtf??
-                slice_vtk_path = OUTPUT_DIR + 'slices/'+'test_slice_'+ str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_' + str(PHIS_SLICES[i_slice]) + '.vtk'
+                slice_vtk_path = OUTPUT_DIR + 'slices/'+slice_name+ str(int(RMIN[i_slice]*1.e-3)) + '_' + str(int(RMAX[i_slice]*1.e-3)) + '_' + str(PHIS_SLICES[i_slice]) + '.vtk'
 
 
                 if os.path.exists(slice_vtk_path):
