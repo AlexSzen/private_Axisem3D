@@ -15,6 +15,7 @@
 #include "eigenc.h"
 #include "PreloopFFTW_time.h"
 #include "Processor.h"
+#include <iostream>
 
 STFCollection::STFCollection(double hdur, double duration, std::string mstf, double dt, int enforceMaxSteps, std::string offaxis_file, bool kernels) {
 	
@@ -150,15 +151,16 @@ STFCollection::STFCollection(double hdur, double duration, std::string mstf, dou
 			std::string coord_system = ".SPZ";
 			std::string key = network[i] + "." + name[i] + coord_system;
 			std::string key_params = network[i] + "." + name[i]; 
-			
+		         	
 			//get dims of seismogram 
 			ncr.getVarDimensions(key, dims);
 			//read trace 
 			RMatX3 trace(dims[0], dims[1]);
 			ncr.read2D(key, trace);
 			
-
-			
+			if (XMPI::root()) {
+			std::cout<<key<<std::endl;
+			}
 			//get dims of params 
 			ncr_params.getVarDimensions(key_params, dims_params);
 			//read params
@@ -172,10 +174,8 @@ STFCollection::STFCollection(double hdur, double duration, std::string mstf, dou
 				ncr_params.getAttribute(key_params, "filter_" + std::to_string(i_measurement), filter_type);
 				filter_types(i_measurement) = filter_type; // gives index of filter to use.
 			} 
-						
 			STF *stf = new SeismogramSTF(trace, dt, duration, hdur, decay, adjoint_params, filter_types);
 		//	STF *stf = new GaussSTF(dt, duration, hdur, decay);
-			
 			// max total steps
 			int maxTotalSteps = INT_MAX;
 			if (enforceMaxSteps > 0) {

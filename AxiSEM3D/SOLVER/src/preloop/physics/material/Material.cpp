@@ -35,9 +35,13 @@ Material::Material(const Quad *myQuad, const ExodusModel &exModel): mMyQuad(myQu
     int quadTag = mMyQuad->getQuadTag();
     if (exModel.isIsotropic()) {
         for (int i = 0; i < 4; i++) {
+            //perturbation on PREM for kernel tests
+            int pert = 0.5;
             mVpv1D(i) = mVph1D(i) = exModel.getElementalVariables("VP_" + std::to_string(i), quadTag);
             mVsv1D(i) = mVsh1D(i) = exModel.getElementalVariables("VS_" + std::to_string(i), quadTag);
             mEta1D(i) = 1.;
+            //mVpv1D(i) = (1+pert)*mVpv1D(i);
+            //mVph1D(i) = (1+pert)*mVph1D(i);
         }
     } else {
         for (int i = 0; i < 4; i++) {

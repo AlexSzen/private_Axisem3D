@@ -6,28 +6,30 @@ cmake_minimum_required(VERSION 3.0.0)
 project(AxiSEM3D)
 enable_language(Fortran)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
 
 ##################################### EDITABLE #####################################
 # Set all necessary variables here.
 # Please only try to edit within this block.
 # If something is missing add it.
 
-# compiler suit
-SET(CMAKE_C_COMPILER           mpicc)
-SET(CMAKE_CXX_COMPILER         mpicxx)
-SET(CMAKE_Fortran_COMPILER     mpif90)
+# compiler suite
+SET(CMAKE_C_COMPILER           cc)
+SET(CMAKE_CXX_COMPILER         CC)
+SET(CMAKE_Fortran_COMPILER     ftn)
 
 # external packages
 # uncomment and edit the following lines to specify preferred prefix
-#SET(EIGEN3_ROOT           /Users/alex/axisem3d_depends/eigen3)
-#SET(FFTW_ROOT             /Users/alex/anaconda3/envs/ax3d)
-#SET(BOOST_ROOT            /Users/alex/axisem3d_depends/boost)
-#SET(METIS_ROOT            /Users/alex/anaconda3/envs/ax3d)
+# SET(EIGEN3_ROOT           edit_here)
+# SET(FFTW_ROOT             edit_here)
+# SET(BOOST_ROOT            edit_here)
+# SET(METIS_ROOT            edit_here)
+# SET(NETCDF_ROOT           edit_here)
+# SET(HDF5_ROOT             edit_here)
 
-#SET(HDF5_ROOT             /home/alex/anaconda2/)
-#SET(NETCDF_ROOT           /Users/alex/anaconda3/envs/ax3d)
-SET(NETCDF_INCLUDE_DIR           /opt/pnetcdf/include/)
-SET(NETCDF_LIBRARIES          /opt/pnetcdf/lib/libnetcdf.so	)
 # polynomial order of spectral elements (from 1 to 8)
 SET(NPOL 4)
 
@@ -40,17 +42,20 @@ SET(USE_DOUBLE TRUE)
 # * wavefield and model visualisation
 SET(USE_PARALLEL_NETCDF FALSE)
 
+# add dynamic link to HDF5 libraries, depending on your netcdf build
+# if you have netcdf installed from anaconda, you won't need this usually
+# if linking of axisem3d fails, set this to TRUE and specify HDF5_ROOT
+# NOTE: HDF5_ROOT should point to the hdf5 library you used to build netcdf
+SET(NEED_HDF5_LINK FALSE)
+
 # additional libraries to link with
-# such as HDF5 when NetCDF is built with --disable-shared (e.g., the parallel build)
-#SET(ADDITIONAL_LIBS "-L$ENV{HOME}/axisem3d_depends/parhdf5/lib -lhdf5 -lhdf5_hl -lcurl")
+# SET(ADDITIONAL_LIBS "-lcurl")
 
 # directory to store FFTW wisdom files
 # Specify any directory that does not require a `sudo` to write.
 # Once set, it is unlikely to be changed. 
 SET(FFTW_WISDOM_DIR $ENV{HOME}/.axisem3d_fftw_wisdom_dir)
 ##################################### EDITABLE #####################################
-
-
 
 ############# macros used in solver #############
 # NPOL
@@ -100,12 +105,16 @@ include_directories(${Boost_INCLUDE_DIRS})
 find_package(METIS REQUIRED)
 include_directories(${METIS_INCLUDE_DIR})
 # netcdf
-#find_package(NETCDF REQUIRED)
-if (NETCDF_ROOT)
-    set(ENV{NETCDF_ROOT} ${NETCDF_ROOT})
+find_package(NETCDF REQUIRED)
+include_directories(${NETCDF_INCLUDE_DIR})
+# hdf5
+if (NEED_HDF5_LINK)
+    if (HDF5_ROOT)
+        set(ENV{HDF5_ROOT} ${HDF5_ROOT})
+    endif ()
+    find_package(HDF5 COMPONENTS C COMPONENTS HL REQUIRED)
 endif ()
 
-include_directories(${NETCDF_INCLUDE_DIR})
 
 ############# local includes #############
 include_directories(
@@ -346,5 +355,7 @@ target_link_libraries(
     ${FFTW_LIBRARIES}
     ${METIS_LIBRARIES}
     ${NETCDF_LIBRARIES}
+    ${HDF5_LIBRARIES}
+    ${HDF5_HL_LIBRARIES}
     ${ADDITIONAL_LIBS}
 )

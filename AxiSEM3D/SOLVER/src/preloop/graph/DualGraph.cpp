@@ -45,7 +45,7 @@ void DualGraph::decompose(const IMatX4 &connectivity, const DecomposeOption &opt
     }
 	
 	if (option.mFwdDD) { //reuse fwd DD 
-    //if (true) { //TEMP:reuse fwd DD 
+    	//if (true) { //TEMP:reuse fwd DD 
 		if (XMPI::root()) {
 			std::string fname;
 			
@@ -53,7 +53,7 @@ void DualGraph::decompose(const IMatX4 &connectivity, const DecomposeOption &opt
 				fname = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd.nc4";
 			#else 
 				//fname = Parameters::sOutputDirectory + "/wavefields/3d_wavefield_db_0.nc4";
-				fname = Parameters::sOutputDirectory + "/wavefields/wavefield_db_fwd_0.nc4";
+				fname = Parameters::sInputDirectory + '/' + option.mDDname;
 			#endif
 
 			NetCDF_Reader nc_reader = NetCDF_Reader();

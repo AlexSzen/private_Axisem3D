@@ -92,6 +92,9 @@ void Parameters::registerAll() {
 	registerPar("THETA_MAX");
 	registerPar("GLL_ANIMATION");
     // inparam.advanced
+
+    registerPar("REUSE_DOMAIN_DECOMP");
+    registerPar("DOMAIN_DECOMP_FILE");
     registerPar("ATTENUATION_CG4");
     registerPar("ATTENUATION_SPECFEM_LEGACY");
     registerPar("ATTENUATION_QKAPPA");

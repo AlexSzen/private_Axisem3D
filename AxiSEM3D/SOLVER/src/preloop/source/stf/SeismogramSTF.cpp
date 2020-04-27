@@ -2,6 +2,7 @@
 // STF produced by seismogram
 #include "SeismogramSTF.h"
 #include "Processor.h"
+#include "Parameters.h"
 #include <cmath>
 #include <string>
 #include <sstream>
@@ -20,52 +21,64 @@ mHalfDuration(hdur_fwd), mDecay(decay_fwd) {
     int nStep = nStepBeforeZero + nStepAfterZero;
 
 	if (nStep + 1 != trace.rows()) throw std::runtime_error("SeismogramSTF::SeismogramSTF : length of seismogram and STF inconsistent.");
-
 	mSTFs.assign(nStep + 1, (double) 0.);
 	mSTFp.assign(nStep + 1, (double) 0.);
 	mSTFz.assign(nStep + 1, (double) 0.);
-
+	
 	// apply each measurement and add to the STF
 	for (int i_measurement = 0; i_measurement < adjoint_params.rows(); i_measurement++) {
 		RDCol2 window = adjoint_params.block(i_measurement, 0, 1, 2);
 		double measurement = adjoint_params(i_measurement, 2);
-
 		RMatX3 trace_measurement_T_disp = trace;
+		RMatX3 disp_tmp = trace;
+		CMatX3 disp_tmp_F;
 		RMatX3 trace_measurement_T_vel = trace;
+		RMatX3 trace_measurement_T_vel2 = trace; //we need another one without measurement on it
 		RMatX3 trace_measurement_T_accel = trace;
 		CMatX3 trace_measurement_F_vel;
+		CMatX3 trace_measurement_F_vel2;
 		CMatX3 trace_measurement_F_accel;
 
 		Processor::transformT2F(trace_measurement_T_vel, trace_measurement_F_vel);
+		Processor::transformT2F(trace_measurement_T_vel2, trace_measurement_F_vel2);
 		Processor::transformT2F(trace_measurement_T_accel, trace_measurement_F_accel);
-		Processor::derivate(trace_measurement_F_vel); //disable for misfit test
-		Processor::derivate(trace_measurement_F_accel); //disable for misfit test
-		Processor::derivate(trace_measurement_F_accel); //disable for misfit test
+		Processor::transformT2F(disp_tmp, disp_tmp_F);
+		Processor::derivate(trace_measurement_F_vel); 
+		Processor::derivate(trace_measurement_F_vel2); 
+		Processor::derivate(trace_measurement_F_accel); 
+		Processor::derivate(trace_measurement_F_accel); 
 		Processor::filter(trace_measurement_F_vel, filter_types[i_measurement]);
 		Processor::filter(trace_measurement_F_accel, filter_types[i_measurement]);
+		Processor::filter(disp_tmp_F, filter_types[i_measurement]);
 		Processor::transformF2T(trace_measurement_F_vel, trace_measurement_T_vel);
+		Processor::transformF2T(trace_measurement_F_vel2, trace_measurement_T_vel2);
 		Processor::transformF2T(trace_measurement_F_accel, trace_measurement_T_accel);
+		Processor::transformF2T(disp_tmp_F, disp_tmp);
 		Processor::taper(trace_measurement_T_vel, (Real) window(0), (Real) window(1));
 		Processor::taper(trace_measurement_T_accel, (Real) window(0), (Real) window(1));
-//		Processor::taper(trace_measurement_T_disp, (Real) window(0), (Real) window(1));
+		Processor::taper(disp_tmp, (Real) window(0), (Real) window(1));
 
 		Real norm_s = 0.;
 		Real norm_p = 0.;
 		Real norm_z = 0.;
 		Real max = 0.;
-		std::ofstream myfile;
-		myfile.open("/home/alex/Desktop/phd/private_Axisem3D/AxiSEM3D/build/output/stations/axisem3D_adj_stf.txt");
+		
+		// Dump seismogram and STF for inspection
+//		std::ofstream myfile, myfile2;
+		
+//		myfile.open(Parameters::sOutputDirectory+"/"+"axisem3D_adj_stf.txt");
+//		myfile2.open(Parameters::sOutputDirectory+"/"+"axisem3D_adj_seism.txt");
 
       
 		for (int it = 0; it <= nStep; it++) { //normalization factor : for traveltime tomo it's time integrated squared velocity
 											 // for amplitude it's displacement
-			//norm_s += mDeltaT * trace_measurement_T_vel(it, 0) * trace_measurement_T_vel_untapered(it, 0);
-            norm_s +=  - mDeltaT * trace_measurement_T_disp(it, 0) * trace_measurement_T_accel(it, 0);
-            norm_p +=  - mDeltaT * trace_measurement_T_disp(it, 1) * trace_measurement_T_accel(it, 1);
-            norm_z +=  - mDeltaT * trace_measurement_T_disp(it, 2) * trace_measurement_T_accel(it, 2);
-
-			//norm_p += mDeltaT * trace_measurement_T_vel(it, 1) * trace_measurement_T_vel(it, 1);
-			//norm_z += mDeltaT * trace_measurement_T_vel(it, 2) * trace_measurement_T_vel(it, 2);
+			norm_s += -mDeltaT * trace_measurement_T_vel(it, 0) * trace_measurement_T_vel2(it, 0);
+            //norm_s +=  - mDeltaT * trace_measurement_T_disp(it, 0) * trace_measurement_T_accel(it, 0);
+            //norm_p +=  - mDeltaT * trace_measurement_T_disp(it, 1) * trace_measurement_T_accel(it, 1);
+            //norm_z +=  - mDeltaT * trace_measurement_T_disp(it, 2) * trace_measurement_T_accel(it, 2);
+//			myfile2 << disp_tmp(it, 2) << "\n";
+			norm_p += -mDeltaT * trace_measurement_T_vel(it, 1) * trace_measurement_T_vel2(it, 1);
+			norm_z += -mDeltaT * trace_measurement_T_vel(it, 2) * trace_measurement_T_vel2(it, 2);
 		}
 		
 		if (norm_s == 0.) norm_s = 1.;
@@ -73,12 +86,12 @@ mHalfDuration(hdur_fwd), mDecay(decay_fwd) {
 		if (norm_z == 0.) norm_z = 1.;
 
 		for (int i = 0; i <= nStep; i++) { //time reversed seismogram.
-            	
-    	   	mSTFs[i] = /*measurement * */ trace_measurement_T_vel(nStep - i, 0) / norm_s; // no need for measurement for traveltime kernels
-    	   	mSTFp[i] = /*measurement * */trace_measurement_T_vel(nStep - i, 1) / norm_p;
+                // ONLY INJECT Z COMPONENT            	
+    	   	//mSTFs[i] = /*measurement * */ trace_measurement_T_vel(nStep - i, 0) / norm_s; // no need for measurement for traveltime kernels
+    	   	//mSTFp[i] = /*measurement * */trace_measurement_T_vel(nStep - i, 1) / norm_p;
     	   	mSTFz[i] = /*measurement * */trace_measurement_T_vel(nStep - i, 2) / norm_z;
     		
-    		myfile<<mSTFs[i]<<"\n";
+  //  		myfile<<mSTFz[i]<<"\n";
 
 	    }
     
@@ -101,10 +114,9 @@ mHalfDuration(hdur_fwd), mDecay(decay_fwd) {
         }
         else std::cout << "Unable to open STF file" << std::endl;
     */   
-		myfile.close();
-
+//		myfile.close();
+//		myfile2.close();
 	}
-
 
 }
 

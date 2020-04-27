@@ -137,6 +137,7 @@ private:
         int mNCutsPerProc;
     } *mDDPar;
     bool mFwdDD; // if computing kernels reuse DD of fwd simulation 
+    std::string mDDname; //name of decomp, located in input/
 	
     ////////////////// wisdom learning //////////////////
     LearnParameters *mLearnPar;

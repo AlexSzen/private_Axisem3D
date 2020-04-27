@@ -44,7 +44,8 @@ mExModel(exModel), mNrField(nrf), mSrcLat(srcLat), mSrcLon(srcLon), mSrcDep(srcD
     mOceanLoad3D = 0;
     mDDPar = new DDParameters(par);
     mLearnPar = new LearnParameters(par);
-	mFwdDD = par.getValue<bool>("COMPUTE_KERNELS");
+    mFwdDD = par.getValue<bool>("REUSE_DOMAIN_DECOMP");
+    mDDname = par.getValue<std::string>("DOMAIN_DECOMP_FILE");
 
     // 2D mode
     std::string mode2d = par.getValue<std::string>("MODEL_2D_MODE");
@@ -134,6 +135,7 @@ void Mesh::buildWeighted() {
     measured.mProcInterval = mDDPar->mProcInterval;
     measured.mNCutsPerProc = mDDPar->mNCutsPerProc;
 	measured.mFwdDD = mFwdDD;
+    measured.mDDname = mDDname;
     MultilevelTimer::begin("Measure", 1);
     measure(measured);
     MultilevelTimer::end("Measure", 1);

@@ -8,11 +8,16 @@
 #include "XMPI.h"
 #include "eigenc.h"
 #include "eigenp.h"
-
+#include <iostream>
+#include <cstdio>
+#include <ctime>
 int axisem_main(int argc, char *argv[]) {
     
     try {
-        
+        std::clock_t start;
+        double duration;
+        start = std::clock();
+
         // variable sets
         PreloopVariables pl;
         SolverVariables sv;
@@ -199,7 +204,8 @@ int axisem_main(int argc, char *argv[]) {
         
         // finalize mpi 
         XMPI::finalize();
-        
+
+        duration = ( std::clock() - start ) / (double) CLOCKS_PER_SEC;
     } catch (const std::exception &e) {
         // print exception
         XMPI::cout.setp(XMPI::rank());

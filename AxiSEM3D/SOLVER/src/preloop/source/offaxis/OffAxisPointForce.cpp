@@ -38,7 +38,7 @@ void OffAxisPointForce::computeSourceFourier(const Quad &myQuad,
     } else {
 		JPRT = RDRowN::Ones();
 	}
-	double eps = 0.001; //we want the gaussian(numax) = eps
+	double eps = 0.0001; //we want the gaussian(numax) = eps
 	double amp = 1e30; // if we want to add a scaling factor
 	amp = 1.;
 	//double a = 0.02;
@@ -63,10 +63,16 @@ void OffAxisPointForce::computeSourceFourier(const Quad &myQuad,
 								}
                             }*/
                         // create a (local) vertical point force.
-                        fouriers[ipnt](beta, 0) = sin(mThetaSrc) * Complex(
-                            (1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
-                        fouriers[ipnt](beta, 2) = cos(mThetaSrc) * Complex(
-                            (1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
+       //                 fouriers[ipnt](beta, 0) = sin(mThetaSrc) * Complex(
+       //                     (1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
+//                        fouriers[ipnt](beta, 2) = cos(mThetaSrc) * Complex(
+//                            (1. / (2. * pi)) *  amp * fact * gauss_fact * exp(beta * phi * iid) * JPRT(ipnt));
+
+                        // Just inject into Z component, AND MATCH THAT WITH STF INJECTION AND MEASUREMENT
+                        // Also try getting rid of gauss fact and only inject fourier as it is.
+                        fouriers[ipnt](beta, 2) = Complex(
+                            (1. / (2. * pi)) *  amp * fact * gauss_fact* exp(beta * phi * iid) * JPRT(ipnt));
+
 
 				                    
 			}

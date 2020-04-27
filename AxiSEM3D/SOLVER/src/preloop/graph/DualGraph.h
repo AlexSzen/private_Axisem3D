@@ -13,6 +13,7 @@ struct DecomposeOption {
     int mProcInterval = 1;
     int mNCutsPerProc = 1;
 	bool mFwdDD = false; // add option to use fwd DD. only activate in build weighted
+    std::string mDDname = " "; //name of domain decomp to reuse
 };
 
 class DualGraph {
